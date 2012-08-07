@@ -12,3 +12,13 @@ Developing
 1. Create a virtualenv for lobbypy
 2. Clone lobbypy into your virtualenv
 3. From within the cloned repository run ../bin/python setup.py develop
+
+Developer To Do List
+--------------------
+
+See lobbypy's [Trello board](https://trello.com/b/g6qXAm1M)
+
+Reporting Issues & Requesting Features
+--------------------------------------
+
+See lobbypy's [Issues page](https://github.com/TronPaul/lobbypy/issues)
