@@ -64,14 +64,16 @@ class ServerCollection(Collection):
         server = Server(self.collection.find_one(dict(_id=ObjectId(name))))
         return _assign(server, name, self)
 
-class Lobby(dict):
+class Lobby(object):
     pass
 
-class Match(dict):
+class Match(object):
     pass
 
-class Player(dict):
-    pass
+class Player(object):
+    def __init__(self, id, steamid):
+        self.id = id
+        self.steamid = steamid
 
-class Server(dict):
+class Server(object):
     pass
