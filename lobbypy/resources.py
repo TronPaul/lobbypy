@@ -1,3 +1,5 @@
+from util import _assign
+
 class Root(object):
     """
     Root of lobby system ie monogdb
@@ -15,6 +17,11 @@ class Root(object):
         return iter(self.db)
 
 class Collection(object):
+    """
+    Generic Mongodb Collection
+    """
+    resources = {'lobby':Lobby, 'match':Match,
+                    'player':Player, 'server':Server}
     def __init__(self, collection):
         self.collection = collection
 
@@ -29,24 +36,36 @@ class Collection(object):
 
 class LobbyCollection(Collection):
     """
-    Mongodb collection of lobbies
+    Collection of lobbies
     """
     pass
 
 class MatchCollection(Collection):
     """
-    Mongodb collection of matches
+    Collection of matches
     """
     pass
 
 class PlayerCollection(Collection):
     """
-    Mongodb collection of players
+    Collection of players
     """
     pass
 
 class ServerCollection(Collection):
     """
-    Mongodb collection of players
+    Collection of players
     """
+    pass
+
+class Lobby(dict):
+    pass
+
+class Match(dict):
+    pass
+
+class Player(dict):
+    pass
+
+class Server(dict):
     pass
