@@ -1,7 +1,31 @@
+import re
+import logging
+
+log = logging.getLogger(__name__)
+
 def _assign(obj, name, parent):
     obj.__name__ = name
     obj.__parent__ = parent
     return obj
 
-def openid(context, request, openid):
-    print openid['identity_url']
+_sid_matcher = re.compile(r'http://steamcommunity\.com/openid/id/(\d+)')
+def openid(context, request, openid_dict):
+    """
+    Do auth for user
+    - if openid does not exist in db, create new Player and auth
+    - else auth as existing player
+    """
+    steamid = int(_sid_matcher.match(openid_dict['identity_url']).group(1))
+    player_coll = context['player'].collection
+    player_dict = {'steamid':steamid}
+    player = player_coll.find_one(player_dict)
+    if player is None:
+        # make a new one
+        player_coll.save(player_dict)
+        log.info('New Player with steamid %d was authed through Steam and created' % steamid)
+        player = player_coll.find_one(player_dict)
+    else:
+        log.info('Returning Player with steamid %d authed through Steam' % steamid)
+    # set up session for this player
+    log.info('Player with steamid %d logged in' % steamid)
+    return player

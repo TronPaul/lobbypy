@@ -1,3 +1,5 @@
+from lobbypy.util import _assign
+
 class Collection(object):
     """
     Generic Mongodb Collection
@@ -53,7 +55,8 @@ class Match(object):
     pass
 
 class Player(object):
-    pass
+    def __init__(self, **kwargs):
+        self.steamid = steamid
 
 class Server(object):
     pass
