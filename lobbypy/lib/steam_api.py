@@ -1,4 +1,4 @@
-from pyramid.threadlocal import get_current_registry()
+from pyramid.threadlocal import get_current_registry
 import logging
 
 log = logging.getLogger(__name__)

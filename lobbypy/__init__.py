@@ -29,6 +29,8 @@ def main(global_config, **settings):
                 return 'MongoDB: <b>{}></b>'.format(self)
     conn = MongoDB(db_uri)
     config.registry.settings['mongodb_conn'] = conn
+    api_key_file = settings['steam.api_key_file']
+    config.registry.settings['steam.api_key'] = open(api_key_file).read()
     config.add_subscriber(add_mongo_db, NewRequest)
     config.scan('lobbypy')
     return config.make_wsgi_app()
