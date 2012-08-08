@@ -1,6 +1,7 @@
 from pyramid.config import Configurator
 from pyramid.events import subscriber
 from pyramid.events import NewRequest
+from pyramid.session import UnencryptedCookieSessionFactoryConfig
 import pymongo
 
 from lobbypy.resources import Root
@@ -8,10 +9,10 @@ from lobbypy.resources import Root
 def main(global_config, **settings):
     """ This function returns a WSGI application.
     """
-    config = Configurator(settings=settings, root_factory=Root)
-    config.add_view('lobbypy.views.my_view',
-                    context='lobbypy:resources.Root',
-                    renderer='lobbypy:templates/mytemplate.pt')
+    # RED PYRO NEEDS CHANGE BADLY
+    my_session_factory = UnencryptedCookieSessionFactoryConfig('bonk')
+    config = Configurator(settings=settings, root_factory=Root,
+            session_factory = my_session_factory)
     config.add_static_view('static', 'lobbypy:static')
     # MongoDB
     def add_mongo_db(event):

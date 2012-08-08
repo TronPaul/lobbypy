@@ -8,7 +8,7 @@ class Root(object):
         self.db = request.db
 
     def __getitem__(self, name):
-        return _assign(self.db[name])
+        return _assign(self.db[name], name, self)
 
     def __len__(self):
         return len(self.db)

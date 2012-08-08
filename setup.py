@@ -5,7 +5,8 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.md')).read()
 
-requires = ['pyramid', 'WebError', 'pymongo']
+requires = ['pyramid', 'WebError', 'pymongo',
+                'pyramid-openid']
 
 setup(name='lobbypy',
       version='0.0',
