@@ -16,3 +16,9 @@ class SteamApiTests(unittest.TestCase):
         # Test in which I prove I am narcissistic
         player_summary = get_player_summary('76561197999483354')
         self.assertTrue('personaname' in player_summary)
+
+    def test_get_player_summary_with_bad_steamid(self):
+        from lobbypy.lib.steam_api import get_player_summary
+        # This is a George test name.  There are many like it, but this one is
+        # mine.
+        self.assertRaises(LookupError, get_player_summary, ('AAAAAAAAAAAA',))

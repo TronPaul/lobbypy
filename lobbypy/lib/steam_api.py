@@ -21,7 +21,10 @@ def get_player_summary(steamid):
     """
     # TODO: error checking here
     link = '%s%s' % (_get_player_summaries_link_base(), steamid)
-    return json.load(urllib2.urlopen(link))['response']['players'][0]
+    players = json.load(urllib2.urlopen(link))['response']['players']
+    if len(players) != 1:
+        raise LookupError('Error getting player summary from Steam API')
+    return players[0]
 
 def get_player_friends(steamid):
     """
