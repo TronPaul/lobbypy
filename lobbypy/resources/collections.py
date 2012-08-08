@@ -1,4 +1,4 @@
-from lobbypy.util import _assign
+from util import _assign
 
 class Collection(object):
     """

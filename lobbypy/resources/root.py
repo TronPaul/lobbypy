@@ -1,6 +1,6 @@
 from collections import (LobbyCollection, MatchCollection, PlayerCollection,
                                 ServerCollection)
-from lobbypy.util import _assign
+from util import _assign
 
 class Root(object):
     """

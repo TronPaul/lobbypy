@@ -3,11 +3,6 @@ import logging
 
 log = logging.getLogger(__name__)
 
-def _assign(obj, name, parent):
-    obj.__name__ = name
-    obj.__parent__ = parent
-    return obj
-
 _sid_matcher = re.compile(r'http://steamcommunity\.com/openid/id/(\d+)')
 def openid(context, request, openid_dict):
     """
