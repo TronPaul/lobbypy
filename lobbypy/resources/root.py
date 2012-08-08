@@ -6,6 +6,8 @@ class Root(object):
     """
     Root of lobby system ie monogdb
     """
+    __name__ = None
+    __parent__ = None
     collections = {'lobby':LobbyCollection, 'match':MatchCollection,
             'player':PlayerCollection, 'server':ServerCollection}
     def __init__(self, request):

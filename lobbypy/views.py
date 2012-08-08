@@ -1,12 +1,13 @@
 from pyramid.view import view_config
+from pyramid.httpexceptions import HTTPFound
 from lobbypy import resources
 from pyramid_openid.view import process_incoming_request, process_provider_response
 
-@view_config(context=resources.root.Root)
+@view_config(context=resources.root.Root, renderer='templates/root.pt')
 def root_view(context, request):
     return {'project':'lobbypy'}
 
-@view_config(context=resources.root.Root, name='login')
+@view_config(context=resources.root.Root, name='login', renderer='templates/root.pt')
 def login_view(context, request):
     openid_mode = request.params.get('openid.mode', None)
     if openid_mode is None:
@@ -14,4 +15,4 @@ def login_view(context, request):
                 'https://steamcommunity.com/openid/')
     elif openid_mode == 'id_res':
         process_provider_response(context, request)
-    return None
+    return HTTPFound(location=request.resource_url(context))
