@@ -1,21 +1,3 @@
-from util import _assign
-
-class Root(object):
-    """
-    Root of lobby system ie monogdb
-    """
-    def __init__(self, request):
-        self.db = request.db
-
-    def __getitem__(self, name):
-        return _assign(self.db[name], name, self)
-
-    def __len__(self):
-        return len(self.db)
-
-    def __iter__(self):
-        return iter(self.db)
-
 class Collection(object):
     """
     Generic Mongodb Collection
@@ -71,9 +53,7 @@ class Match(object):
     pass
 
 class Player(object):
-    def __init__(self, id, steamid):
-        self.id = id
-        self.steamid = steamid
+    pass
 
 class Server(object):
     pass

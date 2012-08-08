@@ -4,7 +4,7 @@ from pyramid.events import NewRequest
 from pyramid.session import UnencryptedCookieSessionFactoryConfig
 import pymongo
 
-from lobbypy.resources import Root
+from lobbypy.resources.root import Root
 
 def main(global_config, **settings):
     """ This function returns a WSGI application.
