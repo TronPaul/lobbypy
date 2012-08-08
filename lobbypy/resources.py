@@ -20,8 +20,6 @@ class Collection(object):
     """
     Generic Mongodb Collection
     """
-    resources = {'lobby':Lobby, 'match':Match,
-                    'player':Player, 'server':Server}
     def __init__(self, collection):
         self.collection = collection
 
@@ -38,25 +36,33 @@ class LobbyCollection(Collection):
     """
     Collection of lobbies
     """
-    pass
+    def __getitem__(self, name):
+        lobby = Lobby(self.collection.find_one(dict(_id=ObjectId(name))))
+        return _assign(lobby, name, self)
 
 class MatchCollection(Collection):
     """
     Collection of matches
     """
-    pass
+    def __getitem__(self, name):
+        match = Match(self.collection.find_one(dict(_id=ObjectId(name))))
+        return _assign(match, name, self)
 
 class PlayerCollection(Collection):
     """
     Collection of players
     """
-    pass
+    def __getitem__(self, name):
+        player = Player(self.collection.find_one(dict(_id=ObjectId(name))))
+        return _assign(player, name, self)
 
 class ServerCollection(Collection):
     """
     Collection of players
     """
-    pass
+    def __getitem__(self, name):
+        server = Server(self.collection.find_one(dict(_id=ObjectId(name))))
+        return _assign(server, name, self)
 
 class Lobby(dict):
     pass
