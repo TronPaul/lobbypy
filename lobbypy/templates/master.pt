@@ -1,0 +1,14 @@
+<html metal:define-macro="base">
+   <head>
+      <title metal:define-slot="title">LobbyPy</title>
+   </head>
+   <body>
+      <div id="wrapper">
+         <div id="header">
+            <div tal:condition="player">Hello <span tal:content="player.steamid">SteamID</span></div>
+            <div tal:condition="not player"><a href="${request.application_url}/login"><img src="/static/sits_large_border.png"/></a></div>
+         </div>
+         <div id="footer"></div>
+      </div>
+   </body>
+</html>
