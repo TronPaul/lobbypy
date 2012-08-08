@@ -22,10 +22,11 @@ def openid(context, request, openid_dict):
     if player is None:
         # make a new one
         player_coll.save(player_dict)
-        log.info('New Player with steamid %d was authed through Steam and created' % steamid)
+        log.info('New Player with steamid %d was authenticated through Steam and created' % steamid)
         player = player_coll.find_one(player_dict)
     else:
-        log.info('Returning Player with steamid %d authed through Steam' % steamid)
+        log.info('Returning Player with steamid %d authenticated through Steam' % steamid)
     # set up session for this player
-    log.info('Player with steamid %d logged in' % steamid)
+    request.session['_id'] = player['_id']
+    log.info('Player with Objectid %s logged in' % player['_id'])
     return player
