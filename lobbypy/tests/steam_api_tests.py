@@ -1,0 +1,18 @@
+import unittest, os
+
+from pyramid import testing
+
+class SteamApiTests(unittest.TestCase):
+    def setUp(self):
+        # TODO: make the file be dynamic off of settings
+        self.config = testing.setUp(settings={'steam.api_key':open(
+            'steam_api_key.secret').read().strip()})
+
+    def tearDown(self):
+        testing.tearDown()
+
+    def test_get_player_summary_dict(self):
+        from lobbypy.lib.steam_api import get_player_summary
+        # Test in which I prove I am narcissistic
+        player_summary = get_player_summary('76561197999483354')
+        self.assertTrue('personaname' in player_summary)
