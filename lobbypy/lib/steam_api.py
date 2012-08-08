@@ -1,10 +1,11 @@
 from pyramid.threadlocal import get_current_registry
-import logging
+
+import logging, json, urllib2
 
 log = logging.getLogger(__name__)
 
 def _get_api_key():
-    api_key = get_current_registry().settings['steam.api_key']
+    return get_current_registry().settings['steam.api_key']
 
 def _get_player_summaries_link_base():
     # TODO: format betterer
@@ -19,7 +20,8 @@ def get_player_summary(steamid):
     Get player data via Steam API GetPlayerSummaries
     """
     # TODO: error checking here
-    return json.load(urllib2.urlopen('%s%s' % (_get_player_summaries_link_base(), steamid)))
+    link = '%s%s' % (_get_player_summaries_link_base(), steamid)
+    return json.load(urllib2.urlopen(link))['response']['players'][0]
 
 def get_player_friends(steamid):
     """

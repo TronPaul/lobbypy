@@ -1,3 +1,5 @@
+from lobbypy.lib.steam_api import get_player_summary
+from bson.objectid import ObjectId
 from util import _assign
 
 class Collection(object):
@@ -37,7 +39,7 @@ class PlayerCollection(Collection):
     Collection of players
     """
     def __getitem__(self, name):
-        player = Player(self.collection.find_one(dict(_id=ObjectId(name))))
+        player = Player(**self.collection.find_one(dict(_id=ObjectId(name))))
         return _assign(player, name, self)
 
 class ServerCollection(Collection):
@@ -56,8 +58,8 @@ class Match(object):
 
 class Player(object):
     def __init__(self, **kwargs):
-        self._id = _id
-        self.steamid = steamid
+        self._id = kwargs['_id']
+        self.steamid = kwargs['steamid']
     
     def __getattr__(self, name):
         if name == 'name':
@@ -83,7 +85,7 @@ class Player(object):
     # TODO: cache this
     def _get_player_summary(self):
         # Do Steam API call to get all data from GetPlayerSummaries for steamid
-        pass 
+        return get_player_summary(self.steamid) 
 
     # TODO: cache this
     def _get_friend_list(self):

@@ -8,7 +8,7 @@ from pyramid_openid.view import process_incoming_request, process_provider_respo
 def root_view(context, request):
     player = None
     if '_id' in request.session:
-        player = context['player'].collection.find_one(request.session['_id'])
+        player = context['player'][request.session['_id']]
     master = get_renderer('templates/master.pt').implementation()
     return dict(master=master, player=player)
 
