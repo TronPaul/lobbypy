@@ -32,12 +32,25 @@ class Collection(object):
     def __iter__(self):
         raise NotImplementedError
 
-    def find(self, **kwargs):
-        for item in self.collection.find(**kwargs):
+    def insert(self, *args, **kwargs):
+        return self.collection.insert(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        return self.collection.save(*args, **kwargs)
+
+    def update(self, *args, **kwargs):
+        return self.collection.update(*args, **kwargs)
+
+    def find(self, *args, **kwargs):
+        # TODO: wrap a cursor
+        for item in self.collection.find(*args, **kwargs):
             yield self._make_one(item, item['_id'])
 
-    def remove(self, spec_or_id=None, **kwargs):
-        return self.collection.remove(spec_or_id, **kwargs)
+    def find_one(self, *args, **kwargs):
+        return self.collection.find_one(*args, **kwargs)
+
+    def remove(self, *args, **kwargs):
+        return self.collection.remove(*args, **kwargs)
 
 class LobbyCollection(Collection):
     """
