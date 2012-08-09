@@ -29,6 +29,7 @@ def main(global_config, **settings):
                 return 'MongoDB: <b>{}></b>'.format(self)
     conn = MongoDB(db_uri)
     config.registry.settings['mongodb_conn'] = conn
+    # Steam API Key
     api_key_file = settings['steam.api_key_file']
     config.registry.settings['steam.api_key'] = open(api_key_file).read().strip()
     config.add_subscriber(add_mongo_db, NewRequest)

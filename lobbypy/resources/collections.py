@@ -60,12 +60,18 @@ class Player(object):
     def __init__(self, **kwargs):
         self._id = kwargs['_id']
         self.steamid = kwargs['steamid']
-    
+
     def __getattr__(self, name):
         if name == 'name':
             # Player name from steam
             return self._get_persona_name()
-        raise AttributeError
+        elif name == 'avatar_large':
+            return self._get_avatar_url('large')
+        elif name == 'avatar_medium':
+            return self._get_avatar_url('medium')
+        elif name == 'avatar_small':
+            return self._get_avatar_url()
+        raise AttributeError(name)
 
     def _get_persona_name(self):
         return self._get_player_summary()['personaname']
@@ -85,7 +91,7 @@ class Player(object):
     # TODO: cache this
     def _get_player_summary(self):
         # Do Steam API call to get all data from GetPlayerSummaries for steamid
-        return get_player_summary(self.steamid) 
+        return get_player_summary(self.steamid)
 
     # TODO: cache this
     def _get_friend_list(self):
