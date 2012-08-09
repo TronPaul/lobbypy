@@ -4,5 +4,12 @@
          Lobby Name: <input type="text" name="name" />
          <input type="submit">
       </form>
+      <div id="lobbies">
+         <ul>
+            <li tal:repeat="lobby lobbies">
+               <span tal:content="lobby.name">Lobby Name</span>
+            </li>
+         </ul>
+      </div>
    </div>
 </html>

@@ -10,7 +10,9 @@ from pyramid_openid.view import (process_incoming_request,
 @view_config(context=resources.root.Root, renderer='templates/root.pt')
 def root_view(context, request):
     master = get_renderer('templates/master.pt').implementation()
-    return dict(master=master)
+    lobby_coll = context['lobby'].collection
+    lobbies = lobby_coll.find(limit=20)
+    return dict(master=master, lobbies=lobbies)
 
 @view_config(context=resources.collections.LobbyCollection,
         request_method='POST', name='create', permission='system.Authenticated')
