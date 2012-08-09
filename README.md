@@ -28,11 +28,13 @@ Prior to the steps below, make sure you have [Python 2.7](http://www.python.org/
         $cd lobbypy
         $../bin/python setup.py develop
 
-4. Run lobbypy:
+4. Put your steam API key into `steam_api_key.secret`
+
+5. Run lobbypy:
 
         $../bin/pserve development.ini --reload
 
-5. Develop!
+6. Develop!
 
 Developer To Do List
 --------------------
