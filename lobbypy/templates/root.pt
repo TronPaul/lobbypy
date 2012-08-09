@@ -1,2 +1,8 @@
 <html metal:use-macro="master.macros['base']">
+   <div metal:fill-slot="content">
+      <form action="${request.resource_url(request.root['lobby'], 'create')}" method="POST">
+         Lobby Name: <input type="text" name="name" />
+         <input type="submit">
+      </form>
+   </div>
 </html>

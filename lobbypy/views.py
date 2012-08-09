@@ -1,6 +1,6 @@
 from pyramid.view import view_config
 from pyramid.renderers import get_renderer
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound, HTTPCreated
 from pyramid.events import ContextFound
 from pyramid.events import subscriber
 from lobbypy import resources
@@ -11,6 +11,22 @@ from pyramid_openid.view import (process_incoming_request,
 def root_view(context, request):
     master = get_renderer('templates/master.pt').implementation()
     return dict(master=master)
+
+@view_config(context=resources.collections.LobbyCollection,
+        request_method='POST', name='create', permission='system.Authenticated')
+def create_lobby(context, request):
+    lobby_coll = context.collection
+    params = request.POST
+    name = params['name']
+    lobby_dict = dict(name=params['name'], owner=request.player._id)
+    _id = lobby_coll.save(lobby_dict)
+    return HTTPFound(location=request.resource_url(context[_id]))
+
+@view_config(context=resources.collections.Lobby,
+        renderer='templates/lobby.pt')
+def view_lobby(context, request):
+    master = get_renderer('templates/master.pt').implementation()
+    return dict(master=master, lobby=context)
 
 @view_config(context=resources.root.Root, name='login', renderer='templates/root.pt')
 def login_view(context, request):

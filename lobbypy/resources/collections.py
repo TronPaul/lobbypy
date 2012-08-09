@@ -1,5 +1,6 @@
 from lobbypy.lib.steam_api import get_player_summary
 from bson.objectid import ObjectId
+from pymongo.errors import InvalidId
 from util import _assign
 
 class Collection(object):
@@ -23,7 +24,12 @@ class LobbyCollection(Collection):
     Collection of lobbies
     """
     def __getitem__(self, name):
-        lobby = Lobby(self.collection.find_one(dict(_id=ObjectId(name))))
+        _id = None
+        try:
+            _id = ObjectId(name)
+        except InvalidId:
+            raise KeyError
+        lobby = Lobby(**self.collection.find_one(dict(_id=_id)))
         return _assign(lobby, name, self)
 
 class MatchCollection(Collection):
@@ -31,7 +37,12 @@ class MatchCollection(Collection):
     Collection of matches
     """
     def __getitem__(self, name):
-        match = Match(self.collection.find_one(dict(_id=ObjectId(name))))
+        _id = None
+        try:
+            _id = ObjectId(name)
+        except InvalidId:
+            raise KeyError
+        match = Match(**self.collection.find_one(dict(_id=_id)))
         return _assign(match, name, self)
 
 class PlayerCollection(Collection):
@@ -39,7 +50,12 @@ class PlayerCollection(Collection):
     Collection of players
     """
     def __getitem__(self, name):
-        player = Player(**self.collection.find_one(dict(_id=ObjectId(name))))
+        _id = None
+        try:
+            _id = ObjectId(name)
+        except InvalidId:
+            raise KeyError
+        player = Player(**self.collection.find_one(dict(_id=_id)))
         return _assign(player, name, self)
 
 class ServerCollection(Collection):
@@ -47,11 +63,18 @@ class ServerCollection(Collection):
     Collection of players
     """
     def __getitem__(self, name):
-        server = Server(self.collection.find_one(dict(_id=ObjectId(name))))
+        _id = None
+        try:
+            _id = ObjectId(name)
+        except InvalidId:
+            raise KeyError
+        server = Server(**self.collection.find_one(dict(_id=_id)))
         return _assign(server, name, self)
 
 class Lobby(object):
-    pass
+    def __init__(self, **kwargs):
+        self._id = kwargs['_id']
+        self.name = kwargs['name']
 
 class Match(object):
     pass
