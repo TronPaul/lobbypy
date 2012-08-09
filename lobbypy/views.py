@@ -41,6 +41,7 @@ def view_lobby(context, request):
     player_id = request.player._id
     old_lobbies = lobby_coll.find(
             **{'players':{'$elemMatch':{'player_id':player_id}}})
+    first_join = True
     for old_lobby in old_lobbies:
         if old_lobby._id != context._id:
             log.info('Player with id %s left lobby with id %s' %
@@ -53,6 +54,11 @@ def view_lobby(context, request):
                 old_lobby.players[:] = [p for p in old_lobby.players
                         if p.get('_id') != player_id]
                 lobby_coll.save(**old_lobby)
+        else:
+            first_join = False
+    if first_join:
+        log.info('Player with id %s joined lobby with id %s' %
+                    (player_id, old_lobby._id))
     master = get_renderer('templates/master.pt').implementation()
     return dict(master=master, lobby=context)
 
