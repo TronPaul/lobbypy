@@ -7,7 +7,7 @@
       <div id="lobbies">
          <ul>
             <li tal:repeat="lobby lobbies">
-               <span tal:content="lobby.name">Lobby Name</span>
+            <a href="${request.resource_url(lobby)}"><span tal:content="lobby.name">Lobby Name</span></a>
             </li>
          </ul>
       </div>

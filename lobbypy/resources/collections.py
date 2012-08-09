@@ -1,7 +1,6 @@
 from lobbypy.lib.steam_api import get_player_summary
 from bson.objectid import ObjectId
 from pymongo.errors import InvalidId
-from util import _assign
 
 class Collection(object):
     """
@@ -11,7 +10,21 @@ class Collection(object):
         self.collection = collection
 
     def __getitem__(self, name):
+        _id = None
+        try:
+            _id = ObjectId(name)
+        except InvalidId:
+            raise KeyError
+        adict = self.collection.find_one(dict(_id=_id))
+        return self._make_one(adict, name)
+
+    def _make_one(self, adict, name):
         raise NotImplementedError
+
+    def _assign(self, obj, name):
+        obj.__name__ = name
+        obj.__parent__ = self
+        return obj
 
     def __len__(self):
         return self.collection.count()
@@ -19,57 +32,37 @@ class Collection(object):
     def __iter__(self):
         raise NotImplementedError
 
+    def find(self, **kwargs):
+        for item in self.collection.find(**kwargs):
+            yield self._make_one(item, item['_id'])
+
 class LobbyCollection(Collection):
     """
     Collection of lobbies
     """
-    def __getitem__(self, name):
-        _id = None
-        try:
-            _id = ObjectId(name)
-        except InvalidId:
-            raise KeyError
-        lobby = Lobby(**self.collection.find_one(dict(_id=_id)))
-        return _assign(lobby, name, self)
+    def _make_one(self, adict, name):
+        return self._assign(Lobby(**adict), name)
 
 class MatchCollection(Collection):
     """
     Collection of matches
     """
-    def __getitem__(self, name):
-        _id = None
-        try:
-            _id = ObjectId(name)
-        except InvalidId:
-            raise KeyError
-        match = Match(**self.collection.find_one(dict(_id=_id)))
-        return _assign(match, name, self)
+    def _make_one(self, adict, name):
+        return self._assign(Match(**adict), name)
 
 class PlayerCollection(Collection):
     """
     Collection of players
     """
-    def __getitem__(self, name):
-        _id = None
-        try:
-            _id = ObjectId(name)
-        except InvalidId:
-            raise KeyError
-        player = Player(**self.collection.find_one(dict(_id=_id)))
-        return _assign(player, name, self)
+    def _make_one(self, adict, name):
+        return self._assign(Player(**adict), name)
 
 class ServerCollection(Collection):
     """
     Collection of players
     """
-    def __getitem__(self, name):
-        _id = None
-        try:
-            _id = ObjectId(name)
-        except InvalidId:
-            raise KeyError
-        server = Server(**self.collection.find_one(dict(_id=_id)))
-        return _assign(server, name, self)
+    def _make_one(self, adict, name):
+        return self._assign(Server(**adict), name)
 
 class Lobby(object):
     def __init__(self, **kwargs):
