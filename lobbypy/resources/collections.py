@@ -36,6 +36,9 @@ class Collection(object):
         for item in self.collection.find(**kwargs):
             yield self._make_one(item, item['_id'])
 
+    def remove(self, spec_or_id=None, **kwargs):
+        return self.collection.remove(spec_or_id, **kwargs)
+
 class LobbyCollection(Collection):
     """
     Collection of lobbies
@@ -68,6 +71,8 @@ class Lobby(object):
     def __init__(self, **kwargs):
         self._id = kwargs['_id']
         self.name = kwargs['name']
+        self.players = kwargs['players']
+        self.owner_id = kwargs['owner_id']
 
 class Match(object):
     pass
