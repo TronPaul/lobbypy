@@ -47,7 +47,8 @@ class Collection(object):
             yield self._make_one(item, item['_id'])
 
     def find_one(self, *args, **kwargs):
-        return self.collection.find_one(*args, **kwargs)
+        item = self.collection.find_one(*args, **kwargs)
+        return self._make_one(item, item['_id'])
 
     def remove(self, *args, **kwargs):
         return self.collection.remove(*args, **kwargs)
