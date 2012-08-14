@@ -1,13 +1,14 @@
 from lobbypy.lib.steam_api import get_player_summary
 from bson.objectid import ObjectId
 from pymongo.errors import InvalidId
+from pymongo.collection import Collection as MongoCollection
 
-class Collection(object):
+class WrappedCollection(MongoCollection):
     """
     Generic Mongodb Collection
     """
-    def __init__(self, collection):
-        self.collection = collection
+    def __init__(self, *args, **kwargs):
+        super(WrappedCollection, self).__init__(*args, **kwargs)
 
     def __getitem__(self, name):
         _id = None
@@ -15,7 +16,7 @@ class Collection(object):
             _id = ObjectId(name)
         except InvalidId:
             raise KeyError
-        adict = self.collection.find_one(dict(_id=_id))
+        adict = self.find_one(dict(_id=_id))
         return self._make_one(adict, name)
 
     def _make_one(self, adict, name):
@@ -27,54 +28,40 @@ class Collection(object):
         return obj
 
     def __len__(self):
-        return self.collection.count()
+        return self.count()
 
     def __iter__(self):
         raise NotImplementedError
 
-    def insert(self, *args, **kwargs):
-        return self.collection.insert(*args, **kwargs)
-
-    def save(self, *args, **kwargs):
-        return self.collection.save(*args, **kwargs)
-
-    def update(self, *args, **kwargs):
-        return self.collection.update(*args, **kwargs)
-
     def find(self, *args, **kwargs):
-        # TODO: wrap a cursor
-        for item in self.collection.find(*args, **kwargs):
-            yield self._make_one(item, item['_id'])
+        return super(WrappedCollection, self).find(as_class=, *args, **kwargs)
 
     def find_one(self, *args, **kwargs):
         item = self.collection.find_one(*args, **kwargs)
         return self._make_one(item, item['_id'])
 
-    def remove(self, *args, **kwargs):
-        return self.collection.remove(*args, **kwargs)
-
-class LobbyCollection(Collection):
+class LobbyCollection(WrappedCollection):
     """
     Collection of lobbies
     """
     def _make_one(self, adict, name):
         return self._assign(Lobby(**adict), name)
 
-class MatchCollection(Collection):
+class MatchCollection(WrappedCollection):
     """
     Collection of matches
     """
     def _make_one(self, adict, name):
         return self._assign(Match(**adict), name)
 
-class PlayerCollection(Collection):
+class PlayerCollection(WrappedCollection):
     """
     Collection of players
     """
     def _make_one(self, adict, name):
         return self._assign(Player(**adict), name)
 
-class ServerCollection(Collection):
+class ServerCollection(WrappedCollection):
     """
     Collection of players
     """
