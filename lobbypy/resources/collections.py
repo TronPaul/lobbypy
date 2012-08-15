@@ -1,7 +1,8 @@
-from lobbypy.lib.steam_api import get_player_summary
+from singletons import Lobby, Match, Player, Server
 from bson.objectid import ObjectId
 from pymongo.errors import InvalidId
 from pymongo.collection import Collection as MongoCollection
+from pymongo.cursor import Cursor as MongoCursor
 
 class WrappedCollection(MongoCollection):
     """
@@ -16,10 +17,9 @@ class WrappedCollection(MongoCollection):
             _id = ObjectId(name)
         except InvalidId:
             raise KeyError
-        adict = self.find_one(dict(_id=_id))
-        return self._make_one(adict, name)
+        return self.find_one(dict(_id=_id))
 
-    def _make_one(self, adict, name):
+    def _make_one(self, adict):
         raise NotImplementedError
 
     def _assign(self, obj, name):
@@ -34,91 +34,42 @@ class WrappedCollection(MongoCollection):
         raise NotImplementedError
 
     def find(self, *args, **kwargs):
-        return super(WrappedCollection, self).find(as_class=, *args, **kwargs)
+        original_getitem = MongoCursor.__getitem__
+        _make_one = self._make_one
+        def __getitem_new__(self, key):
+            return _make_one(original_getitem(self, key))
+        MongoCursor.__getitem__ = __getitem_new__
+        cur = super(WrappedCollection, self).find(*args, **kwargs)
+        return cur
 
     def find_one(self, *args, **kwargs):
-        item = self.collection.find_one(*args, **kwargs)
-        return self._make_one(item, item['_id'])
+        item = super(WrappedCollection, self).find_one(*args, **kwargs)
+        return self._make_one(item)
 
 class LobbyCollection(WrappedCollection):
     """
     Collection of lobbies
     """
-    def _make_one(self, adict, name):
-        return self._assign(Lobby(**adict), name)
+    def _make_one(self, adict):
+        return self._assign(Lobby(**adict), adict['_id'])
 
 class MatchCollection(WrappedCollection):
     """
     Collection of matches
     """
     def _make_one(self, adict, name):
-        return self._assign(Match(**adict), name)
+        return self._assign(Match(**adict), adict['_id'])
 
 class PlayerCollection(WrappedCollection):
     """
     Collection of players
     """
     def _make_one(self, adict, name):
-        return self._assign(Player(**adict), name)
+        return self._assign(Player(**adict), adict['_id'])
 
 class ServerCollection(WrappedCollection):
     """
     Collection of players
     """
     def _make_one(self, adict, name):
-        return self._assign(Server(**adict), name)
-
-class Lobby(object):
-    def __init__(self, **kwargs):
-        self._id = kwargs['_id']
-        self.name = kwargs['name']
-        self.players = kwargs['players']
-        self.owner_id = kwargs['owner_id']
-
-class Match(object):
-    pass
-
-class Player(object):
-    def __init__(self, **kwargs):
-        self._id = kwargs['_id']
-        self.steamid = kwargs['steamid']
-
-    def __getattr__(self, name):
-        if name == 'name':
-            # Player name from steam
-            return self._get_persona_name()
-        elif name == 'avatar_large':
-            return self._get_avatar_url('large')
-        elif name == 'avatar_medium':
-            return self._get_avatar_url('medium')
-        elif name == 'avatar_small':
-            return self._get_avatar_url()
-        raise AttributeError(name)
-
-    def _get_persona_name(self):
-        return self._get_player_summary()['personaname']
-
-    def _get_friends(self):
-        return self._get_friend_list()
-
-    def _get_avatar_url(self, size='small'):
-        summary = self._get_player_summary()
-        if size == 'large':
-            return summary['avatarfull']
-        elif size == 'medium':
-            return summary['avatarmedium']
-        else:
-            return summary['avatar']
-
-    # TODO: cache this
-    def _get_player_summary(self):
-        # Do Steam API call to get all data from GetPlayerSummaries for steamid
-        return get_player_summary(self.steamid)
-
-    # TODO: cache this
-    def _get_friend_list(self):
-        # Do Steam API call to get all data from GetFriendList for steamid
-        pass
-
-class Server(object):
-    pass
+        return self._assign(Server(**adict), adict['_id'])

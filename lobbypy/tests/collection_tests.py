@@ -8,8 +8,8 @@ class CollectionTest(unittest.TestCase):
             def __init__(self, adict):
                 self.update(adict)
         class MockCollection(WrappedCollection):
-            def _make_one(self, adict, name):
-                return self._assign(MockItem(adict), name)
+            def _make_one(self, adict):
+                return self._assign(MockItem(adict), adict['_id'])
         coll = MockCollection(collection.database, collection.name)
         coll.__name__ = 'test'
         return coll
@@ -50,13 +50,13 @@ class CollectionTest(unittest.TestCase):
         coll = self._makeOne(unwrapped_coll)
         # now use coll for finding
         # find both
-        cur = list(coll.find())
-        self.assertEquals(len(cur), 2)
+        cur = coll.find()
+        self.assertEquals(cur.count(), 2)
         self.assertEquals(cur[0].__parent__, coll)
         self.assertEquals(cur[1].__parent__, coll)
         # find complex a
-        cur = list(coll.find({'c':{'$elemMatch': {'g':1}}}))
-        self.assertEquals(len(cur), 1)
+        cur = coll.find({'c':{'$elemMatch': {'g':1}}})
+        self.assertEquals(cur.count(), 1)
         self.assertTrue({'g':1} in cur[0]['c'])
 
     def test_find_one_item(self):
