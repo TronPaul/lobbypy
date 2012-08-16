@@ -27,7 +27,7 @@ setup(name='lobbypy',
       zip_safe=False,
       install_requires=requires,
       tests_require=requires,
-      test_suite="lobbypy",
+      test_suite="lobbypy.tests",
       entry_points = """\
       [paste.app_factory]
       main = lobbypy:main

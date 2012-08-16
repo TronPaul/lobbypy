@@ -1,5 +1,7 @@
-import unittest
 from pyramid import testing
+from bson.objectid import ObjectId
+
+import unittest
 
 class CollectionTest(unittest.TestCase):
     def _makeOne(self, collection):
@@ -36,6 +38,23 @@ class CollectionTest(unittest.TestCase):
 
     def _getUnwrappedCollection(self):
         return self._getDb()['test']
+
+    def test_getitem(self):
+        """
+        Test that __getitem__ gets the correct item
+        """
+        a = {'a':1}
+        unwrapped_coll = self._getUnwrappedCollection()
+        a['_id'] = unwrapped_coll.insert(a)
+        coll = self._makeOne(unwrapped_coll)
+        self.assertEquals(coll[a['_id']], a)
+        a_id = str(a['_id'])
+        bad_id = hex(int(a_id,16) + 1)[2:-1]
+        def get_index(x):
+            return coll[x]
+        self.assertRaises(KeyError, get_index, bad_id)
+        bad_id = 'AAAAAAA'
+        self.assertRaises(KeyError, get_index, bad_id)
 
     def test_find_item(self):
         """

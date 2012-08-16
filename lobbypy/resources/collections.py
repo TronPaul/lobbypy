@@ -17,7 +17,10 @@ class WrappedCollection(MongoCollection):
             _id = ObjectId(name)
         except InvalidId:
             raise KeyError
-        return self.find_one(dict(_id=_id))
+        item = self.find_one(dict(_id=_id))
+        if not item:
+            raise KeyError
+        return item
 
     def _make_one(self, adict):
         raise NotImplementedError
@@ -44,7 +47,7 @@ class WrappedCollection(MongoCollection):
 
     def find_one(self, *args, **kwargs):
         item = super(WrappedCollection, self).find_one(*args, **kwargs)
-        return self._make_one(item)
+        return self._make_one(item) if item else None
 
 class LobbyCollection(WrappedCollection):
     """
