@@ -7,6 +7,15 @@ class Lobby(object):
         self.players = kwargs['players']
         self.owner_id = kwargs['owner_id']
 
+    def leave(self, player_id):
+        if self.owner_id == player_id:
+            raise LobbyOwnerLeaveError
+        self.players[:] = [p for p in old_lobby.players
+                        if p.get('_id') != player_id]
+
+    def join(self, player_id):
+        raise NotImplementedError
+
 class Match(object):
     pass
 
