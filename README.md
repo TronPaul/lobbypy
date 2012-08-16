@@ -36,6 +36,21 @@ Prior to the steps below, make sure you have [Python 2.7](http://www.python.org/
 
 6. Develop!
 
+Test Coverage
+-------------
+
+To check the current test coverage of lobbypy:
+
+1. Get the dependencies:
+
+        $../bin/pip install nose coverage
+
+2. Run nosetests:
+
+        $../bin/nosetests
+
+   Optional add `--cover-html` arguement to generate html pages describing coverage
+
 Developer To Do List
 --------------------
 
