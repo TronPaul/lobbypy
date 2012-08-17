@@ -48,12 +48,31 @@ class CollectionTest(unittest.TestCase):
         a['_id'] = unwrapped_coll.insert(a)
         coll = self._makeOne(unwrapped_coll)
         self.assertEquals(coll[a['_id']], a)
-        a_id = str(a['_id'])
+
+    def test_getitem_nonexistent_id(self):
+        """
+        Test that __getitem__ raises KeyError with nonexistent _id
+        """
+        a = {'a':1}
+        unwrapped_coll = self._getUnwrappedCollection()
+        a_id = str(unwrapped_coll.insert(a))
+        coll = self._makeOne(unwrapped_coll)
         bad_id = hex(int(a_id,16) + 1)[2:-1]
         def get_index(x):
             return coll[x]
         self.assertRaises(KeyError, get_index, bad_id)
+
+    def test_getitem_bad_id(self):
+        """
+        Test that __getitem__ raises KeyError with bad _id
+        """
+        a = {'a':1}
+        unwrapped_coll = self._getUnwrappedCollection()
+        a['_id'] = unwrapped_coll.insert(a)
+        coll = self._makeOne(unwrapped_coll)
         bad_id = 'AAAAAAA'
+        def get_index(x):
+            return coll[x]
         self.assertRaises(KeyError, get_index, bad_id)
 
     def test_find_item(self):
