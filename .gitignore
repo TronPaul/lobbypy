@@ -28,3 +28,6 @@ pip-log.txt
 
 #Steam API key
 steam_api_key.secret
+
+#coverage output
+cover
