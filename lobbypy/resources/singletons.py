@@ -8,13 +8,17 @@ class Lobby(object):
         self.owner_id = kwargs['owner_id']
 
     def leave(self, player_id):
-        if self.owner_id == player_id:
-            raise LobbyOwnerLeaveError
+        assert player_id != self.owner_id, """Owner leaving lobby.\
+                It should have been destroyed!!!"""
         self.players[:] = [p for p in old_lobby.players
                         if p.get('_id') != player_id]
 
     def join(self, player_id):
-        raise NotImplementedError
+        assert (not all(map(
+            lambda x: player_id == x['_id'], self.players)),
+                    """Player joined lobby twice!!!""")
+        self.players.append({'_id':player_id, 'team':0,
+                                'class':-1})
 
 class Match(object):
     pass
