@@ -14,9 +14,8 @@ class Lobby(object):
                         if p.get('_id') != player_id]
 
     def join(self, player_id):
-        assert (not all(map(
-            lambda x: player_id == x['_id'], self.players)),
-                    """Player joined lobby twice!!!""")
+        assert not all(map(lambda x: player_id == x['_id'],
+            self.players)), """Player joined lobby twice!!!"""
         self.players.append({'_id':player_id, 'team':0,
                                 'class':-1})
 
