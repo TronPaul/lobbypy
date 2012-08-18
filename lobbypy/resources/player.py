@@ -3,7 +3,7 @@ from lobbypy.lib.steam_api import get_player_summary
 from mongoengine import *
 
 class Player(Document):
-    steamid = IntField(required=True)
+    steamid = IntField(required=True, unique=True)
 
     def __getattr__(self, name):
         if name == 'name':
