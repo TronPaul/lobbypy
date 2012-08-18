@@ -7,6 +7,7 @@ from pyramid_openid.view import (process_incoming_request,
         process_provider_response)
 
 from lobbypy.resources import *
+from lobbypy.resources.lobby import LobbyPlayer
 from bson.objectid import ObjectId
 
 import logging
@@ -35,33 +36,22 @@ def create_lobby(request):
 
 @view_config(route_name='lobby', renderer='templates/lobby.pt')
 def view_lobby(request):
-    lobby_q = Lobby.objects(id=request.matchdict['lobby_id'])
-    lobby = lobby_q.first()
-    # Check if the player is in other lobbies, if so, remove us from them
-    old_lobbies = Lobby.objects(players__player = request.player)
-    rejoin = False
-    for old_lobby in old_lobbies:
-        if old_lobby.id != lobby.id:
-            if old_lobby.owner == request.player:
-                # Destroy this lobby
-                # TODO: just give lobby lead to someone else?
-                # TODO: kick everyone out of the lobby back to the main page
-                old_lobby.delete()
-                log.info('Lobby owner with id %s left lobby with id %s' %
-                    (request.player.id, old_lobby.id))
-            else:
-                Lobby.objects(id=old_lobby.id).update_one(pull__players__player
-                        = request.player)
-            log.info('Player with id %s left lobby with id %s' %
-                    (request.player.id, old_lobby.id))
-        else:
-            rejoin = True
-    if not rejoin:
-        from lobbypy.resources.lobby import LobbyPlayer
-        lobby_q.update_one(__push__players = LobbyPlayer(player=request.player,
+    lobby = Lobby.objects(id=request.matchdict['lobby_id']).first()
+    # Check if the player is an owner of any lobbies, destroy them
+    owned_lobbies_q = Lobby.objects(owner = request.player, id__ne = lobby.id)
+    map(lambda x: log.info('Owner with id %s leaving Lobby with id %s' %
+        (request.player.id, x.id)), owned_lobbies_q.all())
+    owned_lobbies_q.delete(True)
+    # Check if the player is in any lobbies, remove the player from them
+    old_lobbies_q = Lobby.objects(players__player = request.player, id__ne =
+            lobby.id)
+    map(lambda x: log.info('Player with id %s leaving Lobby with id %s' %
+        (request.player.id, x.id)), old_lobbies_q.all())
+    old_lobbies_q.update(pull__players__player = request.player)
+    # Join the lobby if we weren't alread in the lobby
+    if all(map(lambda x: x.player != request.player, lobby.players)):
+        lobby.update(push__players = LobbyPlayer(player=request.player,
             team=0))
-        log.info('Player with id %s joined lobby with id %s' %
-                    (player_id, old_lobby._id))
     master = get_renderer('templates/master.pt').implementation()
     return dict(master=master, lobby=lobby)
 
