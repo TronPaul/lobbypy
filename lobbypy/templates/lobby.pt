@@ -1,2 +1,24 @@
 <html metal:use-macro="master.macros['base']">
+   <div metal:fill-slot="content">
+      <div id="players">
+         Team 1
+         <ul id="team-1">
+            <li tal:repeat="player [p.player for p in lobby.players if p.team == 1]">
+               <span tal:content="player.name">Player Name</span>
+            </li>
+         </ul>
+         Team 2
+         <ul id="team-2">
+            <li tal:repeat="player [p.player for p in lobby.players if p.team == 2]">
+               <span tal:content="player.name">Player Name</span>
+            </li>
+         </ul>
+         Spectators
+         <ul id="team-0">
+            <li tal:repeat="player [p.player for p in lobby.players if p.team == 0]">
+               <span tal:content="player.name">Player Name</span>
+            </li>
+         </ul>
+      </div>
+   </div>
 </html>
