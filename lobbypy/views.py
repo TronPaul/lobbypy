@@ -60,7 +60,15 @@ def view_lobby(request):
     master = get_renderer('templates/master.pt').implementation()
     return dict(master=master, lobby=lobby)
 
-@view_config(route_name='login', renderer='templates/root.pt')
+@view_config(route_name='lobby_set_team', request_method='POST')
+def ajax_set_team(request):
+    pass
+
+@view_config(route_name='lobby_set_class', request_method='POST')
+def ajax_set_class(request):
+    pass
+
+@view_config(route_name='login')
 def login_view(request):
     openid_mode = request.params.get('openid.mode', None)
     if openid_mode is None:
@@ -68,6 +76,13 @@ def login_view(request):
                 'https://steamcommunity.com/openid/')
     elif openid_mode == 'id_res':
         process_provider_response(None, request)
+    return HTTPFound(location=request.route_path('root'))
+
+@view_config(route_name='logout')
+def logout_view(request):
+    player = request.player
+    request.session.invalidate()
+    # TODO: drop player from all lobbies
     return HTTPFound(location=request.route_path('root'))
 
 @view_config(route_name='player', renderer='templates/player.pt')
