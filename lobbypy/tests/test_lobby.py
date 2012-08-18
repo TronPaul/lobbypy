@@ -1,4 +1,4 @@
-from lobbypy.resources.singletons import Lobby
+from lobbypy.resources.lobby import Lobby
 from pyramid import testing
 
 from bson.objectid import ObjectId

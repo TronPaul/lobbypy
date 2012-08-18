@@ -2,16 +2,14 @@ from pyramid.config import Configurator
 from pyramid.events import subscriber
 from pyramid.events import NewRequest
 from pyramid.session import UnencryptedCookieSessionFactoryConfig
-from mongo import connect
-
-from lobbypy.resources.root import Root
+from mongoengine import connect
 
 def main(global_config, **settings):
     """ This function returns a WSGI application.
     """
     # RED PYRO NEEDS CHANGE BADLY
     my_session_factory = UnencryptedCookieSessionFactoryConfig('bonk')
-    config = Configurator(settings=settings, root_factory=Root,
+    config = Configurator(settings=settings,
             session_factory = my_session_factory)
     config.add_static_view('static', 'lobbypy:static')
     # MongoDB
@@ -24,6 +22,11 @@ def main(global_config, **settings):
     # Steam API Key
     api_key_file = settings['steam.api_key_file']
     config.registry.settings['steam.api_key'] = open(api_key_file).read().strip()
-    config.add_subscriber(add_mongo_db, NewRequest)
+    # Add routes
+    config.add_route('root', pattern='/')
+    config.add_route('login', pattern='/login')
+    config.add_route('lobby_create', pattern='/lobby/create')
+    config.add_route('lobby', pattern='/lobby/{lobby_id}/')
+    config.add_route('player', pattern='/player/{player_id}/')
     config.scan('lobbypy')
     return config.make_wsgi_app()

@@ -5,8 +5,8 @@
    <body>
       <div id="wrapper">
          <div id="header">
-            <div tal:condition="request.player">Hello <a href="${request.resource_url(request.player)}"><span tal:content="request.player.name">Name</span></a></div>
-            <div tal:condition="not request.player"><a href="${request.application_url}/login"><img src="/static/sits_large_border.png"/></a></div>
+            <div tal:condition="request.player">Hello <a href="${request.route_url('player', player_id=request.player.id)}"><span tal:content="request.player.name">Name</span></a></div>
+            <div tal:condition="not request.player"><a href="${request.route_url('login')}"><img src="/static/sits_large_border.png"/></a></div>
          </div>
             <div id="content" metal:define-slot="content">
             </div>
