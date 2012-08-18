@@ -26,7 +26,12 @@ def create_lobby(request):
     from lobbypy.resources.lobby import LobbyPlayer
     params = request.POST
     name = params['name']
-    lobby_dict = dict()
+    # Check if the player is an owner of any lobbies, destroy them
+    owned_lobbies_q = Lobby.objects(owner = request.player)
+    map(lambda x: log.info('Owner with id %s leaving Lobby with id %s' %
+        (request.player.id, x.id)), owned_lobbies_q.all())
+    owned_lobbies_q.delete(True)
+    # Create the lobby
     lobby = Lobby(name=params['name'], owner=request.player,
                     players=[LobbyPlayer(player=request.player, team=0)])
     lobby.save()
