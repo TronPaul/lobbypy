@@ -2,15 +2,26 @@ from pyramid.config import Configurator
 from pyramid.events import subscriber
 from pyramid.events import NewRequest
 from pyramid.session import UnencryptedCookieSessionFactoryConfig
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
 from mongoengine import connect
+
+from lobbypy.lib.auth import group_lookup
+from lobbypy.resources.root import RootFactory
 
 def main(global_config, **settings):
     """ This function returns a WSGI application.
     """
     # RED PYRO NEEDS CHANGE BADLY
     my_session_factory = UnencryptedCookieSessionFactoryConfig('bonk')
+    authen_pol = AuthTktAuthenticationPolicy('bonk', callback=group_lookup,
+            cookie_name='_id')
+    author_pol = ACLAuthorizationPolicy()
     config = Configurator(settings=settings,
-            session_factory = my_session_factory)
+            session_factory = my_session_factory,
+            authentication_policy=authen_pol,
+            authorization_policy=author_pol,
+            root_factory=RootFactory)
     config.add_static_view('static', 'lobbypy:static')
     # MongoDB
     db_name = settings['mongodb.db_name']

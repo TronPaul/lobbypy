@@ -1,6 +1,9 @@
 from lobbypy.resources import Player
-import re
-import logging
+
+from pyramid.security import remember
+
+from bson.objectid import ObjectId
+import re, logging
 
 log = logging.getLogger(__name__)
 
@@ -22,6 +25,12 @@ def openid(context, request, openid_dict):
     else:
         log.info('Returning Player with steamid %d authenticated through Steam' % steamid)
     # set up session for this player
-    request.session['_id'] = player.id
+    headers = remember(request, str(player.id))
     log.info('Player with Objectid %s logged in' % player.id)
-    return player
+    return (player, headers)
+
+def group_lookup(user_id, request):
+    player = Player.objects.with_id(ObjectId(user_id))
+    if player is not None:
+        return []
+    return None

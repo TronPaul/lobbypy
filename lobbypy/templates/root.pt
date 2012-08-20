@@ -1,6 +1,6 @@
 <html metal:use-macro="master.macros['base']">
    <div metal:fill-slot="content">
-      <form action="${request.route_path('lobby_create')}" method="POST">
+      <form tal:condition="hasattr(request, 'player')" action="${request.route_path('lobby_create')}" method="POST">
          Lobby Name: <input type="text" name="name" />
          <input type="submit">
       </form>
