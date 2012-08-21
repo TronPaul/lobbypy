@@ -8,6 +8,8 @@
             var players = {};
             var my_id = '${request.player.id}';
 
+            jQuery.post('_get_players_delta', JSON.stringify(players), updatePlayers)
+
             function setTeam(i) {
                jQuery.post('_set_team', { 'team':i }, updatePlayers);
             }
