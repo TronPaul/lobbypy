@@ -11,7 +11,7 @@ from lobbypy.resources import *
 from lobbypy.resources.lobby import LobbyPlayer
 from bson.objectid import ObjectId
 
-import logging
+import logging, json
 
 log = logging.getLogger(__name__)
 
@@ -87,8 +87,7 @@ def ajax_set_class(request):
 @view_config(route_name='lobby_get_players_delta', renderer='json',
         request_method='POST')
 def ajex_get_players_delta(request):
-    params = request.POST
-    old_players_state = params['players']
+    old_players_state = request.json_body
     # TODO: make this be a keepalive for player
     lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
     new_players_state = dict(map(lambda x: (str(x.player.id), {'team':x.team,

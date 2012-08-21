@@ -1,7 +1,7 @@
 <html metal:use-macro="master.macros['base']">
    <div metal:fill-slot="content">
       <div id="players">
-         <script>
+         <script type="text/javascript">
             /*
              * Map of player ids to team/class
              */
@@ -18,7 +18,7 @@
             
             function updatePlayers(delta) {
                // TODO: check response
-               jQuery.extend(players, delta);
+               players = jQuery.extend(true, {}, players, delta);
                updatePlayersUI(delta);
             }
 
