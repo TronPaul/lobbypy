@@ -74,13 +74,13 @@ def ajax_set_team(request):
         renderer='json', permission='play')
 def ajax_set_class(request):
     params = request.POST
-    pclass = params['pclass']
+    pclass = params['class']
     Lobby.objects(id=request.matchdict['lobby_id'], players__player =
             request.player).update(set__players__S__pclass = pclass)
-    lobby = Lobby.object(id=request.matchdict['lobby_id']).first()
+    lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
     log.info('Player with id %s set class to %s in lobby %s' %
             (request.player.id, pclass, lobby))
-    return {'team':filter(lambda x: x == request.player, lobby.players)[0].pclass}
+    return {'class':filter(lambda x: x.player == request.player, lobby.players)[0].pclass}
 
 def ajax_keep_alive(request):
     pass
