@@ -9,23 +9,19 @@
             var my_id = '${request.player.id}';
 
             function setTeam(i) {
-               jQuery.post('_set_team', { 'team':i });
-               // TODO: check for OK response
-               var delta = {}
-               delta[my_id] = {'class':i}
-               updatePlayersUI(delta);
-               jQuery.extend(players, delta)
+               jQuery.post('_set_team', { 'team':i }, updatePlayers);
             }
 
             function setClass(i) {
-               jQuery.post('_set_class', { 'class':i });
-               var delta = {}
-               delta[my_id] = {'class':i}
-               // TODO: check for OK response
-               updatePlayersUI(delta);
-               jQuery.extend(players, delta)
+               jQuery.post('_set_class', { 'class':i }, updatePlayers);
             }
             
+            function updatePlayers(delta) {
+               // TODO: check response
+               jQuery.extend(players, delta);
+               updatePlayersUI(delta);
+            }
+
             /*
              * Update the UI with the provided delta
              * ie change in information

@@ -68,7 +68,8 @@ def ajax_set_team(request):
     lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
     log.info('Player with id %s set team to %s in lobby %s' %
             (request.player.id, team, lobby.id))
-    return {'team':filter(lambda x: x.player == request.player, lobby.players)[0].team}
+    return {str(request.player.id):{'team':filter(lambda x: x.player ==
+            request.player, lobby.players)[0].team}}
 
 @view_config(route_name='lobby_set_class', request_method='POST',
         renderer='json', permission='play')
@@ -80,10 +81,20 @@ def ajax_set_class(request):
     lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
     log.info('Player with id %s set class to %s in lobby %s' %
             (request.player.id, pclass, lobby))
-    return {'class':filter(lambda x: x.player == request.player, lobby.players)[0].pclass}
+    return {str(request.player.id):{'class':filter(lambda x: x.player ==
+            request.player, lobby.players)[0].pclass}}
 
-def ajax_keep_alive(request):
-    pass
+@view_config(route_name='lobby_get_players_delta', renderer='json',
+        request_method='POST')
+def ajex_get_players_delta(request):
+    params = request.POST
+    old_players_state = params['players']
+    # TODO: make this be a keepalive for player
+    lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
+    new_players_state = dict(map(lambda x: (str(x.player.id), {'team':x.team,
+        'class':x.pclass}), lobby.players))
+    # TODO: do diff between the dictionaries
+    return new_players_state
 
 @view_config(route_name='login')
 def login_view(request):
