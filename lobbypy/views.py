@@ -65,10 +65,10 @@ def ajax_set_team(request):
     team = params['team']
     Lobby.objects(id=request.matchdict['lobby_id'], players__player =
             request.player).update(set__players__S__team = team)
-    lobby = Lobby.object(id=request.matchdict['lobby_id']).only('id').first()
+    lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
     log.info('Player with id %s set team to %s in lobby %s' %
             (request.player.id, team, lobby.id))
-    return {'team':filter(lambda x: x == request.player, lobby.players)[0].team}
+    return {'team':filter(lambda x: x.player == request.player, lobby.players)[0].team}
 
 @view_config(route_name='lobby_set_class', request_method='POST',
         renderer='json', permission='play')
@@ -101,15 +101,10 @@ def logout_view(request):
     assert player is not None
     request.session.invalidate()
     headers = forget(request)
-    owned_lobbies_q = Lobby.objects(owner = player)
-    map(lambda x: log.info('Owner with id %s leaving Lobby with id %s' %
-            (player.id, x.id)), owned_lobbies_q.all())
-    owned_lobbies_q.delete(True)
-    # Check if the player is in any lobbies, remove the player from them
-    old_lobbies_q = Lobby.objects(players__player = player)
-    map(lambda x: log.info('Player with id %s leaving Lobby with id %s' %
-            (player.id, x.id)), old_lobbies_q.all())
-    old_lobbies_q.update(pull__players__player = player)
+    from lobbypy.resources.lobby import (leave_lobbies,
+            destroy_owned_lobbies)
+    destroy_owned_lobbies(player)
+    leave_lobbies(player)
     return HTTPFound(location=request.route_path('root'), headers=headers)
 
 @view_config(route_name='player', renderer='templates/player.pt')

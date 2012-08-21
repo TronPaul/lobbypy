@@ -1,21 +1,54 @@
 <html metal:use-macro="master.macros['base']">
    <div metal:fill-slot="content">
       <div id="players">
-         Team 1
+         <script>
+            /*
+             * Map of player ids to team/class
+             */
+            var players = {};
+            var my_id = '${request.player.id}';
+
+            function setTeam(i) {
+               jQuery.post('_set_team', { 'team':i });
+               // TODO: check for OK response
+               var delta = {}
+               delta[my_id] = {'class':i}
+               updatePlayersUI(delta);
+               jQuery.extend(players, delta)
+            }
+
+            function setClass(i) {
+               jQuery.post('_set_class', { 'class':i });
+               var delta = {}
+               delta[my_id] = {'class':i}
+               // TODO: check for OK response
+               updatePlayersUI(delta);
+               jQuery.extend(players, delta)
+            }
+            
+            /*
+             * Update the UI with the provided delta
+             * ie change in information
+             */
+            function updatePlayersUI(delta) {
+               
+            }
+         </script>
+         <a href="#" onclick="setTeam(1)">Team 1</a>
          <ul id="team-1">
-            <li tal:repeat="player [p.player for p in lobby.players if p.team == 1]">
+            <li tal:repeat="player [p.player for p in lobby.players if p.team == 1]" tal:attributes="id player.id">
                <span tal:content="player.name">Player Name</span>
             </li>
          </ul>
-         Team 2
+         <a href="#" onclick="setTeam(2)">Team 2</a>
          <ul id="team-2">
-            <li tal:repeat="player [p.player for p in lobby.players if p.team == 2]">
+            <li tal:repeat="player [p.player for p in lobby.players if p.team == 2]" tal:attributes="id player.id">
                <span tal:content="player.name">Player Name</span>
             </li>
          </ul>
-         Spectators
+         <a href="#" onclick="setTeam(0)">Spectators</a>
          <ul id="team-0">
-            <li tal:repeat="player [p.player for p in lobby.players if p.team == 0]">
+            <li tal:repeat="player [p.player for p in lobby.players if p.team == 0]" tal:attributes="id player.id">
                <span tal:content="player.name">Player Name</span>
             </li>
          </ul>
