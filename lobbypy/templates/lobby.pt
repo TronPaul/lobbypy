@@ -7,8 +7,10 @@
              */
             var players = {};
             var my_id = '${request.player.id}';
-
-            jQuery.post('_get_players_delta', JSON.stringify(players), updatePlayers)
+            setInterval(function() {
+               jQuery.post('_get_players_delta', JSON.stringify(players), updatePlayers)
+            }, 1000)
+            
 
             function setTeam(i) {
                jQuery.post('_set_team', { 'team':i }, updatePlayers);
