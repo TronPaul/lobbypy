@@ -90,9 +90,23 @@ def ajex_get_players_delta(request):
     old_players_state = request.json_body
     # TODO: make this be a keepalive for player
     lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
-    new_players_state = dict(map(lambda x: (str(x.player.id), {'team':x.team,
-        'class':x.pclass}), lobby.players))
-    # TODO: do diff between the dictionaries
+    delta_dict = []
+    # add any new players to delta
+    def state_to_lobby_player(s_id, inner_dict):
+        id = ObjectId(s_id)
+        player = Player.objects.with_id(id)
+        team = inner_dict['team']
+        pclass = inner_dict['class']
+        return LobbyPlayer(player, team, pclass)
+    old_lobby_players = map(lambda x: state_to_lobby_player(*x),
+            old_players.items())
+    delta_dict['new'] = filter(lambda x: x.player not in map(
+            lambda x: x.player, old_lobby_players), lobby.players)
+    # find all players that left
+    delta_dict['old'] = filter(lambda x: x.player not in map(
+            lambda x: x.player, new_lobby_players), old_lobby_players)
+    # find all the players that were modified
+    delta_dict['modified'] = None
     return new_players_state
 
 @view_config(route_name='login')

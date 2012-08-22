@@ -29,7 +29,9 @@
              * ie change in information
              */
             function updatePlayersUI(delta) {
-               
+               // add any unknown players from delta
+               // remove any known players if deleted
+               // update remaining players
             }
          </script>
          <a href="#" onclick="setTeam(1)">Team 1</a>
