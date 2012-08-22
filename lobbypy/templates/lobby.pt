@@ -20,7 +20,10 @@
             
             function updatePlayers(delta) {
                // TODO: check response
-               players = jQuery.extend(true, {}, players, delta);
+               players = jQuery.extend(true, {}, players, delta['modified']);
+               for (var i = 0; i < delta['removed'].length; i++) {
+                  delete players[delta['removed'][i]];
+               }
                updatePlayersUI(delta);
             }
 
@@ -29,9 +32,19 @@
              * ie change in information
              */
             function updatePlayersUI(delta) {
-               // add any unknown players from delta
+               // add new players or make modifications from modified
+               jQuery.each(delta['modified'], function(key, value) {
+                  elems = $("#" + key).detach();
+                  if (elems.length > 0) { //Modify
+                     elems.appendTo("#team-" + value['team']);
+                  } else { //New
+                     $('#team-' + value['team']).after('<li id="' + key +'"><span>' + '</span></li>');
+                  }
+               });
                // remove any known players if deleted
-               // update remaining players
+               jQuery.each(delta['removed'], function(index, value) {
+                  $('#' + value).remove();
+               });
             }
          </script>
          <a href="#" onclick="setTeam(1)">Team 1</a>

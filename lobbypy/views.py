@@ -68,8 +68,8 @@ def ajax_set_team(request):
     lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
     log.info('Player with id %s set team to %s in lobby %s' %
             (request.player.id, team, lobby.id))
-    return {str(request.player.id):{'team':filter(lambda x: x.player ==
-            request.player, lobby.players)[0].team}}
+    return {'modified':{str(request.player.id):{'team':filter(lambda x: x.player ==
+            request.player, lobby.players)[0].team}}, 'removed':[]}
 
 @view_config(route_name='lobby_set_class', request_method='POST',
         renderer='json', permission='play')
@@ -81,8 +81,8 @@ def ajax_set_class(request):
     lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
     log.info('Player with id %s set class to %s in lobby %s' %
             (request.player.id, pclass, lobby))
-    return {str(request.player.id):{'class':filter(lambda x: x.player ==
-            request.player, lobby.players)[0].pclass}}
+    return {'modified':{str(request.player.id):{'class':filter(lambda x: x.player ==
+            request.player, lobby.players)[0].pclass}}, 'removed':[]}
 
 @view_config(route_name='lobby_get_players_delta', renderer='json',
         request_method='POST')
@@ -90,8 +90,7 @@ def ajex_get_players_delta(request):
     old_players_state = request.json_body
     # TODO: make this be a keepalive for player
     lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
-    delta_dict = []
-    # add any new players to delta
+    # convert client json to LobbyPlayer
     def state_to_lobby_player(s_id, inner_dict):
         id = ObjectId(s_id)
         player = Player.objects.with_id(id)
@@ -99,15 +98,14 @@ def ajex_get_players_delta(request):
         pclass = inner_dict['class']
         return LobbyPlayer(player, team, pclass)
     old_lobby_players = map(lambda x: state_to_lobby_player(*x),
-            old_players.items())
-    delta_dict['new'] = filter(lambda x: x.player not in map(
-            lambda x: x.player, old_lobby_players), lobby.players)
-    # find all players that left
-    delta_dict['old'] = filter(lambda x: x.player not in map(
-            lambda x: x.player, new_lobby_players), old_lobby_players)
-    # find all the players that were modified
-    delta_dict['modified'] = None
-    return new_players_state
+            old_players_state.items())
+    delta_dict = {}
+    delta_dict['modified'] = set(lobby.players) - set(old_lobby_players)
+    delta_dict['removed'] = set(map(lambda x: x.player, old_lobby_players)) - set(map(lambda x: x.player, lobby.players))
+    json_dict = {}
+    json_dict['modified'] = dict(map(lambda x: (str(x.player.id), {'class':x.pclass, 'team':x.team}), delta_dict['modified']))
+    json_dict['removed'] = map(lambda x: str(x.player.id), delta_dict['removed'])
+    return json_dict
 
 @view_config(route_name='login')
 def login_view(request):
