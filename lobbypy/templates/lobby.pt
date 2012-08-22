@@ -34,11 +34,16 @@
             function updatePlayersUI(delta) {
                // add new players or make modifications from modified
                jQuery.each(delta['modified'], function(key, value) {
-                  elems = $("#" + key).detach();
+                  elems = $('#' + key);
                   if (elems.length > 0) { //Modify
-                     elems.appendTo("#team-" + value['team']);
+                     if (value['team'] !== undefined) {
+                        elems.detach().appendTo("#team-" + value['team']);
+                     }
+                     elems.children('#' + key + '-class').text(value['class']);
                   } else { //New
-                     $('#team-' + value['team']).after('<li id="' + key +'"><span>' + '</span></li>');
+                     $('#team-' + value['team']).after('<li id="' + key +'">'+
+                     '<span>' + 'Player Name' + '</span>' +
+                     '<span>' + 'Player Class' + '</span></li>');
                   }
                });
                // remove any known players if deleted
@@ -47,22 +52,40 @@
                });
             }
          </script>
-         <a href="#" onclick="setTeam(1)">Team 1</a>
+         <div id="class-picker" tal:condition="hasattr(request, 'player')">
+            <a href="#" onclick="setClass(0)">Random</a>
+            <a href="#" onclick="setClass(1)">Scout</a>
+            <a href="#" onclick="setClass(2)">Soldier</a>
+            <a href="#" onclick="setClass(3)">Pyro</a>
+            <a href="#" onclick="setClass(4)">Demoman</a>
+            <a href="#" onclick="setClass(5)">Heavy</a>
+            <a href="#" onclick="setClass(6)">Engineer</a>
+            <a href="#" onclick="setClass(7)">Medic</a>
+            <a href="#" onclick="setClass(8)">Sniper</a>
+            <a href="#" onclick="setClass(9)">Spy</a>
+         </div>
+         <a tal:condition="hasattr(request, 'player')" href="#" onclick="setTeam(1)">Team 1</a>
+         <a tal:condition="not hasattr(request, 'player')" href="#">Team 1</a>
          <ul id="team-1">
-            <li tal:repeat="player [p.player for p in lobby.players if p.team == 1]" tal:attributes="id player.id">
-               <span tal:content="player.name">Player Name</span>
+            <li tal:repeat="lp [p for p in lobby.players if p.team == 1]" tal:attributes="id lp.player.id">
+               <span tal:attributes="id '%s-name' % lp.player.id" tal:content="lp.player.name">Player Name</span>
+               <span tal:attributes="id '%s-class' % lp.player.id" tal:content="lp.pclass">Player Class</span>
             </li>
          </ul>
-         <a href="#" onclick="setTeam(2)">Team 2</a>
+         <a tal:condition="hasattr(request, 'player')" href="#" onclick="setTeam(2)">Team 2</a>
+         <a tal:condition="not hasattr(request, 'player')" href="#">Team 2</a>
          <ul id="team-2">
-            <li tal:repeat="player [p.player for p in lobby.players if p.team == 2]" tal:attributes="id player.id">
-               <span tal:content="player.name">Player Name</span>
+            <li tal:repeat="lp [p for p in lobby.players if p.team == 2]" tal:attributes="id lp.player.id">
+               <span tal:attributes="id '%s-name' % lp.player.id" tal:content="lp.player.name">Player Name</span>
+               <span tal:attributes="id '%s-class' % lp.player.id" tal:content="lp.pclass">Player Class</span>
             </li>
          </ul>
-         <a href="#" onclick="setTeam(0)">Spectators</a>
+         <a tal:condition="hasattr(request, 'player')" href="#" onclick="setTeam(0)">Spectators</a>
+         <a tal:condition="not hasattr(request, 'player')" href="#">Spectators</a>
          <ul id="team-0">
-            <li tal:repeat="player [p.player for p in lobby.players if p.team == 0]" tal:attributes="id player.id">
-               <span tal:content="player.name">Player Name</span>
+            <li tal:repeat="lp [p for p in lobby.players if p.team == 0]" tal:attributes="id lp.player.id">
+               <span tal:attributes="id '%s-name' % lp.player.id" tal:content="lp.player.name">Player Name</span>
+               <span tal:attributes="id '%s-class' % lp.player.id" tal:content="lp.pclass">Player Class</span>
             </li>
          </ul>
       </div>
