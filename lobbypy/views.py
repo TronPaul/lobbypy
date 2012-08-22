@@ -79,7 +79,7 @@ def ajax_set_team(request):
     Lobby.objects(id=request.matchdict['lobby_id'], players__player =
             request.player).update(set__players__S__team = team)
     lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
-    log.info('Player with id %s set team to %s in lobby %s' %
+    log.info('Player with id %s set team to %s in lobby with id %s' %
             (request.player.id, team, lobby.id))
     return {'modified':{str(request.player.id):{'team':filter(
             lambda x: x.player == request.player,
@@ -96,8 +96,8 @@ def ajax_set_class(request):
     Lobby.objects(id=request.matchdict['lobby_id'], players__player =
             request.player).update(set__players__S__pclass = pclass)
     lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
-    log.info('Player with id %s set class to %s in lobby %s' %
-            (request.player.id, pclass, lobby))
+    log.info('Player with id %s set class to %s in lobby with id %s' %
+            (request.player.id, pclass, lobby.id))
     return {'modified':{str(request.player.id):{'class':filter(
             lambda x: x.player == request.player,
             lobby.players)[0].pclass}}, 'removed':[]}
