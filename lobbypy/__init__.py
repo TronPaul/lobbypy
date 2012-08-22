@@ -10,7 +10,8 @@ from lobbypy.lib.auth import group_lookup
 from lobbypy.resources.root import RootFactory
 
 def main(global_config, **settings):
-    """ This function returns a WSGI application.
+    """ 
+    This function returns a WSGI application.
     """
     # RED PYRO NEEDS CHANGE BADLY
     my_session_factory = UnencryptedCookieSessionFactoryConfig('bonk')
@@ -26,13 +27,10 @@ def main(global_config, **settings):
     # MongoDB
     db_name = settings['mongodb.db_name']
     connect(db_name)
-    if 'pyramid_debugtoolbar' in set(settings.values()):
-        class MongoDB(pymongo.Connection):
-            def __html__(self):
-                return 'MongoDB: <b>{}></b>'.format(self)
     # Steam API Key
     api_key_file = settings['steam.api_key_file']
-    config.registry.settings['steam.api_key'] = open(api_key_file).read().strip()
+    config.registry.settings['steam.api_key'] = open(
+            api_key_file).read().strip()
     # Add routes
     config.add_route('root', pattern='/')
     config.add_route('login', pattern='/login')
