@@ -50,7 +50,7 @@ def view_lobby(context, request):
     View lobby
     Join if logged in, otherwise just view
     """
-    lobby = Lobby.objects(id=request.matchdict['lobby_id']).first()
+    lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
     if has_permission('play', context, request):
         # Join the lobby if authenticated
         player = request.player
@@ -67,6 +67,25 @@ def view_lobby(context, request):
                     (player.id, lobby.id))
     master = get_renderer('templates/master.pt').implementation()
     return dict(master=master, lobby=lobby)
+
+@view_config(route_name='lobby_leave')
+def leave_lobby(request):
+    """
+    Leave lobby
+    Leave if only a player, destroy if owner
+    """
+    lobby = Lobby.objects.with_id(request.matchdict['lobby_id'])
+    player = request.player
+    assert player is not None
+    if lobby.owner == player:
+        lobby.delete()
+        log.info('Lobby owner with id %s destroyed lobby with id %s' %
+                (player.id, lobby.id))
+    else:
+        lobby.update(pull_players__player = player)
+        log.info('Player with id %s left lobby with id %s' %
+                (player.id, lobby.id))
+    return HTTPFound(location = request.route_url('root'))
 
 @view_config(route_name='lobby_set_team', request_method='POST',
         renderer='json', permission='play')

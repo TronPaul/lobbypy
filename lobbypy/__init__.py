@@ -37,6 +37,7 @@ def main(global_config, **settings):
     config.add_route('logout', pattern='/logout')
     config.add_route('lobby_create', pattern='/lobby/create')
     config.add_route('lobby', pattern='/lobby/{lobby_id}/')
+    config.add_route('lobby_leave', pattern='/lobby/{lobby_id}/leave')
     config.add_route('lobby_set_team', pattern='/lobby/{lobby_id}/_set_team')
     config.add_route('lobby_set_class', pattern='/lobby/{lobby_id}/_set_class')
     config.add_route('lobby_get_players_delta',
