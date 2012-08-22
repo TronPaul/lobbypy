@@ -120,7 +120,7 @@ def ajex_get_players_delta(request):
         player = Player.objects.with_id(id)
         team = inner_dict['team']
         pclass = inner_dict['class']
-        return LobbyPlayer(player, team, pclass)
+        return LobbyPlayer(player=player, team=team, pclass=pclass)
     old_lobby_players = map(lambda x: state_to_lobby_player(*x),
             old_players_state.items())
     delta_dict = {}
