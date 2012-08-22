@@ -1,5 +1,5 @@
 <html metal:use-macro="master.macros['base']">
-   <div metal:fill-slot="content">
+   <tal:block metal:fill-slot="content">
       <div id="players">
          <script type="text/javascript">
             /*
@@ -91,5 +91,8 @@
             </li>
          </ul>
       </div>
-   </div>
+      <div>
+         <a href="${request.route_url('lobby_leave', lobby_id=lobby.id)}">Leave Lobby</a>
+      </div>
+   </tal:block>
 </html>
