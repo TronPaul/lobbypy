@@ -6,7 +6,8 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.md')).read()
 
 requires = ['pyramid', 'WebError', 'mongoengine',
-                'pyramid-openid', 'blinker']
+                'pyramid-openid', 'blinker',
+            'pyramid_beaker']
 
 setup(name='lobbypy',
       version='0.0',

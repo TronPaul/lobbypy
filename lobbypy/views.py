@@ -9,6 +9,7 @@ from pyramid.security import has_permission, forget, authenticated_userid
 
 from lobbypy.resources import *
 from lobbypy.resources.lobby import LobbyPlayer
+from lobbypy.lib.ajax_json import make_lobby_player_delta
 from bson.objectid import ObjectId
 
 import logging
@@ -82,7 +83,7 @@ def leave_lobby(request):
         log.info('Lobby owner with id %s destroyed lobby with id %s' %
                 (player.id, lobby.id))
     else:
-        lobby.update(pull_players__player = player)
+        lobby.update(pull__players__player = player)
         log.info('Player with id %s left lobby with id %s' %
                 (player.id, lobby.id))
     return HTTPFound(location = request.route_url('root'))
@@ -137,21 +138,12 @@ def ajex_get_players_delta(request):
         """
         id = ObjectId(s_id)
         player = Player.objects.with_id(id)
-        team = inner_dict['team']
-        pclass = inner_dict['class']
+        team = inner_dict['team'] if 'team' in inner_dict else None
+        pclass = inner_dict['class'] if 'class' in inner_dict else None
         return LobbyPlayer(player=player, team=team, pclass=pclass)
     old_lobby_players = map(lambda x: state_to_lobby_player(*x),
             old_players_state.items())
-    delta_dict = {}
-    delta_dict['modified'] = set(lobby.players) - set(old_lobby_players)
-    delta_dict['removed'] = (set(map(lambda x: x.player, old_lobby_players)) -
-                             set(map(lambda x: x.player, lobby.players)))
-    json_dict = {}
-    json_dict['modified'] = dict(map(lambda x: (str(x.player.id),
-            {'class':x.pclass, 'team':x.team}), delta_dict['modified']))
-    json_dict['removed'] = map(lambda x: str(x.player.id),
-            delta_dict['removed'])
-    return json_dict
+    return make_lobby_player_delta(lobby.players, old_lobby_players)
 
 @view_config(route_name='login')
 def login_view(request):

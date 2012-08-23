@@ -1,7 +1,7 @@
 from pyramid.config import Configurator
 from pyramid.events import subscriber
 from pyramid.events import NewRequest
-from pyramid.session import UnencryptedCookieSessionFactoryConfig
+from pyramid_beaker import session_factory_from_settings
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from mongoengine import connect
@@ -14,23 +14,28 @@ def main(global_config, **settings):
     This function returns a WSGI application.
     """
     # RED PYRO NEEDS CHANGE BADLY
-    my_session_factory = UnencryptedCookieSessionFactoryConfig('bonk')
-    authen_pol = AuthTktAuthenticationPolicy('bonk', callback=group_lookup,
-            cookie_name='_id')
-    author_pol = ACLAuthorizationPolicy()
-    config = Configurator(settings=settings,
-            session_factory = my_session_factory,
-            authentication_policy=authen_pol,
-            authorization_policy=author_pol,
-            root_factory=RootFactory)
+    config = Configurator(settings=settings)
     config.add_static_view('static', 'lobbypy:static')
     # MongoDB
     db_name = settings['mongodb.db_name']
     connect(db_name)
     # Steam API Key
-    api_key_file = settings['steam.api_key_file']
-    config.registry.settings['steam.api_key'] = open(
+    api_key_file = settings['steam_api.key_file']
+    config.registry.settings['steam_api.key'] = open(
             api_key_file).read().strip()
+    # Beaker Session
+    settings['session.key'] = open(settings['session.key_file']).read().strip()
+    session_factory = session_factory_from_settings(settings)
+    config.set_session_factory(session_factory)
+    # Authentication policy
+    auth_key = open(settings['authentication_policy.key_file']).read().strip()
+    authentication_policy = AuthTktAuthenticationPolicy(auth_key, callback=group_lookup)
+    config.set_authentication_policy(authentication_policy)
+    # Authorization Policy
+    authorization_policy = ACLAuthorizationPolicy()
+    config.set_authorization_policy(authorization_policy)
+    # Root Factory
+    config.set_root_factory(RootFactory)
     # Add routes
     config.add_route('root', pattern='/')
     config.add_route('login', pattern='/login')

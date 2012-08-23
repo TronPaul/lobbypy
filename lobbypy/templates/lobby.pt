@@ -44,8 +44,8 @@
                      elems.children('#' + key + '-class').text(value['class']);
                   } else { //New
                      $('#team-' + value['team']).after('<li id="' + key +'">'+
-                     '<span>' + 'Player Name' + '</span>' +
-                     '<span>' + 'Player Class' + '</span></li>');
+                     '<span>' + value['name'] + '</span>' +
+                     '<span>' + value['class'] + '</span></li>');
                   }
                });
                // remove any known players if deleted

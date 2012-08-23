@@ -5,7 +5,7 @@ import logging, json, urllib2
 log = logging.getLogger(__name__)
 
 def _get_api_key():
-    return get_current_registry().settings['steam.api_key']
+    return get_current_registry().settings['steam_api.key']
 
 def _get_player_summaries_link_base():
     # TODO: format betterer
