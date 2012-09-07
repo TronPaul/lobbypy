@@ -7,7 +7,7 @@ README = open(os.path.join(here, 'README.md')).read()
 
 requires = ['pyramid', 'WebError', 'mongoengine',
                 'pyramid-openid', 'blinker',
-            'pyramid_beaker']
+            'pyramid_beaker', 'gevent-socketio']
 
 setup(name='lobbypy',
       version='0.0',
