@@ -1,10 +1,6 @@
 from pyramid.view import view_config
 from pyramid.renderers import get_renderer
 from pyramid.httpexceptions import HTTPFound
-from pyramid.events import NewRequest
-from pyramid.events import subscriber
-from pyramid_openid.view import (process_incoming_request,
-        process_provider_response)
 from pyramid.security import has_permission, forget, authenticated_userid
 
 from lobbypy.resources import *
@@ -36,7 +32,7 @@ def create_lobby(request):
             (player.id, lobby.id))
     return HTTPFound(location=request.route_url('lobby', lobby_id=lobby.id))
 
-@view_config(route_name='lobby', renderer='templates/lobby.pt')
+@view_config(route_name='lobby', renderer='../templates/lobby.pt')
 def view_lobby(context, request):
     """
     View lobby
@@ -57,7 +53,7 @@ def view_lobby(context, request):
                     team=0))
             log.info('Player with id %s joined lobby with id %s' %
                     (player.id, lobby.id))
-    master = get_renderer('templates/master.pt').implementation()
+    master = get_renderer('../templates/master.pt').implementation()
     return dict(master=master, lobby=lobby)
 
 @view_config(route_name='lobby_leave')
@@ -135,5 +131,3 @@ def ajex_get_players_delta(request):
     old_lobby_players = map(lambda x: state_to_lobby_player(*x),
             old_players_state.items())
     return make_lobby_player_delta(lobby.players, old_lobby_players)
-
-

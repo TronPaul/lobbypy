@@ -1,27 +1,24 @@
 from pyramid.view import view_config
 from pyramid.renderers import get_renderer
 from pyramid.httpexceptions import HTTPFound
-from pyramid.events import NewRequest
-from pyramid.events import subscriber
+from pyramid.events import subscriber, NewRequest
 from pyramid_openid.view import (process_incoming_request,
         process_provider_response)
 from pyramid.security import has_permission, forget, authenticated_userid
 
 from lobbypy.resources import *
-from lobbypy.resources.lobby import LobbyPlayer
-from lobbypy.lib.ajax_json import make_lobby_player_delta
 from bson.objectid import ObjectId
 
 import logging
 
 log = logging.getLogger(__name__)
 
-@view_config(route_name='root', renderer='templates/root.pt')
+@view_config(route_name='root', renderer='../templates/root.pt')
 def root_view(request):
     """
     Root view for lobbypy
     """
-    master = get_renderer('templates/master.pt').implementation()
+    master = get_renderer('../templates/master.pt').implementation()
     lobbies = Lobby.objects[:20]
     return dict(master=master, lobbies=lobbies)
 
