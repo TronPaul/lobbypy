@@ -43,10 +43,6 @@ def main(global_config, **settings):
     config.add_route('lobby_create', pattern='/lobby/create')
     config.add_route('lobby', pattern='/lobby/{lobby_id}/')
     config.add_route('lobby_leave', pattern='/lobby/{lobby_id}/leave')
-    config.add_route('lobby_set_team', pattern='/lobby/{lobby_id}/_set_team')
-    config.add_route('lobby_set_class', pattern='/lobby/{lobby_id}/_set_class')
-    config.add_route('lobby_get_players_delta',
-            pattern='/lobby/{lobby_id}/_get_players_delta')
     config.add_route('player', pattern='/player/{player_id}/')
     config.scan('lobbypy')
     return config.make_wsgi_app()
