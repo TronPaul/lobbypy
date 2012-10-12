@@ -10,7 +10,7 @@ Developing
 ----------
 
 Prior to the steps below, make sure you have [Python 2.7](http://www.python.org/download/),
-[easy_install (aka setuptools)](http://pypi.python.org/pypi/setuptools/), and
+[easy\_install (aka setuptools)](http://pypi.python.org/pypi/setuptools/), and
 [virtualenv](http://pypi.python.org/pypi/virtualenv/).  You will also need a
 [mongodb](http://www.mongodb.org/) server and a [Steam API key](http://steamcommunity.com/dev/apikey)
 
@@ -32,7 +32,7 @@ Prior to the steps below, make sure you have [Python 2.7](http://www.python.org/
 
 5. Run lobbypy:
 
-        $../bin/pserve development.ini --reload
+        $../bin/pserve development.ini
 
 6. Develop!
 
