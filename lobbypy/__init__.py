@@ -21,7 +21,7 @@ def main(global_config, **settings):
     connect(db_name)
     # Steam API Key
     api_key_file = settings['steam_api.key_file']
-    config.registry.settings['steam_api.key'] = open(
+    config.registry.settings['steam.api_key'] = open(
             api_key_file).read().strip()
     # Beaker Session
     settings['session.key'] = open(settings['session.key_file']).read().strip()
