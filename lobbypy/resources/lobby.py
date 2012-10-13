@@ -26,43 +26,6 @@ class LobbyPlayer(EmbeddedDocument):
     team = IntField(min_value=0, max_value=2, choices=TEAMS, default=0, required=True)
     pclass = IntField(min_value=0, max_value=9, choices=CLASSES, default=0, required=True)
 
-    def __eq__(self, other):
-        return (self.player == other.player and
-                self.team == other.team and
-                self.pclass == other.pclass)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __lt__(self, other):
-        if self.player < other.player:
-            return True
-        elif self.player == other.player:
-            if self.team < other.team:
-                return True
-            elif self.team == other.team:
-                return self.pclass < other.pclass
-        return False
-
-    def __le__(self, other):
-         return self.__eq__(other) or self.__lt__(other)
-
-    def __gt__(self, other):
-        if self.player > other.player:
-            return True
-        elif self.player == other.player:
-            if self.team > other.team:
-                return True
-            elif self.team == other.team:
-                return self.pclass > other.pclass
-        return False
-
-    def __ge__(self, other):
-        return self.__eq__(other) or self.__gt__(other)
-
-    def __hash__(self):
-        return hash((self.player, self.team, self.pclass))
-
 class Lobby(Document):
     name = StringField(required=True)
     owner = ReferenceField(Player, required=True, unique=True)
