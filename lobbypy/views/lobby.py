@@ -20,8 +20,7 @@ def create_lobby(request):
     """
     player = request.player
     assert player is not None
-    from lobbypy.resources.lobby import destroy_owned_lobbies
-    destroy_owned_lobbies(player)
+    player.destroy_owned_lobbies()
     params = request.POST
     name = params['name']
     # Create the lobby
@@ -43,10 +42,8 @@ def view_lobby(context, request):
         # Join the lobby if authenticated
         player = request.player
         assert player is not None
-        from lobbypy.resources.lobby import (leave_lobbies,
-                destroy_owned_lobbies)
-        destroy_owned_lobbies(player, lobby)
-        leave_lobbies(player, lobby)
+        player.destroy_owned_lobbies(lobby)
+        player.leave_lobbies(lobby)
         # Join the lobby if we weren't alread in the lobby
         if all(map(lambda x: x.player != player, lobby.players)):
             lobby.update(push__players = LobbyPlayer(player=player,

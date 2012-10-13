@@ -41,3 +41,42 @@ class Player(Document):
     def _get_friend_list(self):
         # Do Steam API call to get all data from GetFriendList for steamid
         pass
+
+    def leave_lobbies(self, exclude=None):
+        """
+        Remove player from lobbies excluding lobby `excluded`
+        """
+        from lobby import Lobby
+        q_dict = dict(players__player = self)
+        if exclude is not None:
+            if isinstance(exclude, Lobby):
+                exclude = exclude.id
+            #TODO allow lists of excluded lobbies
+            elif not isinstance(exclude, ObjectId):
+                # TODO: raise error here
+                pass
+            q_dict['id__ne'] = exclude
+        # Check if the player is in any lobbies, remove the player from them
+        old_lobbies_q = Lobby.objects(**q_dict)
+        map(lambda x: log.info('Player with id %s leaving Lobby with id %s' %
+                (self.id, x.id)), old_lobbies_q.all())
+        old_lobbies_q.update(pull__players__player = self)
+
+    def destroy_owned_lobbies(self, exclude=None):
+        """
+        Destroy lobbies a player owns excluding `excluded`
+        """
+        from lobby import Lobby
+        q_dict = dict(owner = self)
+        if exclude is not None:
+            if isinstance(exclude, Lobby):
+                exclude = exclude.id
+            #TODO allow lists of excluded lobbies
+            elif not isinstance(exclude, ObjectId):
+                # TODO: raise error here
+                pass
+            q_dict['id__ne'] = exclude
+        owned_lobbies_q = Lobby.objects(**q_dict)
+        map(lambda x: log.info('Owner with id %s leaving Lobby with id %s' %
+                (self.id, x.id)), owned_lobbies_q.all())
+        owned_lobbies_q.delete(True)
