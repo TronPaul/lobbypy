@@ -5,8 +5,8 @@ from pyramid import testing
 class SteamApiTests(unittest.TestCase):
     def setUp(self):
         # TODO: make the file be dynamic off of settings
-        self.config = testing.setUp(settings={'steam.api_key':open(
-            'steam_api_key.secret').read().strip()})
+        key = open('steam_api_key.secret').read().strip()
+        self.config = testing.setUp(settings={'steam.api_key':key})
 
     def tearDown(self):
         testing.tearDown()
