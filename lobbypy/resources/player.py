@@ -1,6 +1,9 @@
 from lobbypy.lib.steam_api import get_player_summary
 
 from mongoengine import *
+import logging
+
+log = logging.getLogger(__name__)
 
 class Player(Document):
     steamid = IntField(required=True, unique=True)
