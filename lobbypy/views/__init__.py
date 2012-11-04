@@ -1,29 +1,40 @@
-from pyramid.view import view_config
-from pyramid.renderers import get_renderer
 from pyramid.httpexceptions import HTTPFound
 from pyramid.events import subscriber, NewRequest
 from pyramid_openid.view import (process_incoming_request,
         process_provider_response)
 from pyramid.security import has_permission, forget, authenticated_userid
 
-from lobbypy.resources import *
-from bson.objectid import ObjectId
+from ..models import (
+        DBSession,
+        Player
+        )
+
+from .ajax_lobby import (
+        create_lobby_ajax,
+        all_lobbies_ajax,
+        lobby_state_ajax,
+        )
+
+__all__ = [
+        'index',
+        'login',
+        'logout',
+        'create_lobby_ajax',
+        'all_lobbies_ajax',
+        'lobby_state_ajax',
+        ]
 
 import logging
 
 log = logging.getLogger(__name__)
 
-@view_config(route_name='root', renderer='../templates/root.pt')
-def root_view(request):
+def index(request):
     """
     Root view for lobbypy
     """
-    master = get_renderer('../templates/master.pt').implementation()
-    lobbies = Lobby.objects[:20]
-    return dict(master=master, lobbies=lobbies)
+    return {}
 
-@view_config(route_name='login')
-def login_view(request):
+def login(request):
     """
     Login through Steam
     """
@@ -33,23 +44,17 @@ def login_view(request):
                 'https://steamcommunity.com/openid/')
     elif openid_mode == 'id_res':
         headers = process_provider_response(None, request)[1]
-    return HTTPFound(location=request.route_path('root'), headers=headers)
+    return HTTPFound(location=request.route_path('index'), headers=headers)
 
-@view_config(route_name='logout')
-def logout_view(request):
+def logout(request):
     """
     Logout
     clear headers/session
     """
-    player = request.player
-    assert player is not None
     request.session.invalidate()
     headers = forget(request)
-    from lobbypy.resources.lobby import (leave_lobbies,
-            destroy_owned_lobbies)
-    destroy_owned_lobbies(player)
-    leave_lobbies(player)
-    return HTTPFound(location=request.route_path('root'), headers=headers)
+    del request.player
+    return HTTPFound(location=request.route_path('index'), headers=headers)
 
 @subscriber(NewRequest)
 def get_player_from_session(event):
@@ -58,7 +63,7 @@ def get_player_from_session(event):
     """
     user_id = authenticated_userid(event.request)
     if user_id is not None:
-        player = Player.objects.with_id(ObjectId(user_id))
+        player = DBSession.query(Player).filter_by(steamid=user_id).first()
         event.request.player = player
     elif hasattr(event.request, 'player'):
         del event.request.player

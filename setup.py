@@ -4,36 +4,45 @@ from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.md')).read()
+CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
-requires = ['pyramid', 'WebError', 'mongoengine',
-                'pyramid-openid', 'blinker',
-            'pyramid_beaker', 'gevent-socketio',
-            'gunicorn']
+requires = ['pyramid',
+            'SQLAlchemy',
+            'transaction',
+            'pyramid_tm',
+            'pyramid_debugtoolbar',
+            'zope.sqlalchemy',
+            'waitress',
+            'pyramid-openid',
+            'blinker',
+            'pyramid_beaker',
+            'gevent-socketio',
+            'gunicorn',
+            'redis']
 
 setup(name='lobbypy',
       version='0.0',
       description='lobbypy',
-      long_description=README,
+      long_description=README + '\n\n' +  CHANGES,
       classifiers=[
         "Programming Language :: Python",
-        "Framework :: Pylons",
+        "Framework :: Pyramid",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         ],
-      author="Mark McGuire",
-      author_email='mark.b.mcg@gmail.com',
-      url='https://github.com/TronPaul/lobbypy',
-      keywords='tf2 web lobby',
+      author='',
+      author_email='',
+      url='',
+      keywords='web wsgi bfg pylons pyramid',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
+      test_suite='lobbypy',
       install_requires=requires,
-      tests_require=requires,
-      test_suite="lobbypy.tests",
-      entry_points = """\
+      entry_points="""\
       [paste.app_factory]
       main = lobbypy:main
+      [console_scripts]
+      initialize_lobbypy_db = lobbypy.scripts.initializedb:main
       """,
-      paster_plugins=['pyramid'],
       )
-

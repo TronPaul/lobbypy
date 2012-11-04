@@ -1,2 +1,0 @@
-<html metal:use-macro="master.macros['base']">
-</html>
