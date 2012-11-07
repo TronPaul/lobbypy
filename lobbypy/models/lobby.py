@@ -7,7 +7,7 @@ from sqlalchemy import (
         )
 
 from sqlalchemy.orm import relationship
-from sqlalchemy import event
+from sqlalchemy.event import listens_for
 
 from . import Base, PyramidJSONEncoder
 
@@ -195,20 +195,3 @@ class LobbyPlayer(Base):
                 'player': self.player,
                 'class': self.cls,
                 }
-
-def create_event(mapper, connection, target):
-    import redis
-    from json import dumps
-    r = redis.Redis()
-    r.publish('lobbies', dumps(dict(event='create', lobby=target), cls=PyramidJSONEncoder))
-
-def destroy_event(mapper, connection, target):
-    import redis
-    from json import dumps
-    r = redis.Redis()
-    r.publish('lobbies', dumps(dict(event='destroy', lobby_id=target.id), cls=PyramidJSONEncoder))
-    r.publish('lobby/%s' % target.id, dumps(dict(event='destroy'), cls=PyramidJSONEncoder))
-
-# Lobby Create/Destroy
-event.listen(Lobby, 'after_insert', create_event)
-event.listen(Lobby, 'after_delete', destroy_event)
