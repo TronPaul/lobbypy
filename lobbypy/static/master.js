@@ -1,8 +1,12 @@
-var socket;
+var lobbies_s;
+var lobby_s;
 
 $(document).ready(function() {
     WEB_SOCKET_SWF_LOCATION = "/static/WebSocketMain.swf";
     WEB_SOCKET_DEBUG = true;
+
+    lobbies_s = io.connect('/lobbies'),
+    lobby_s = io.connect('/lobby');
 
     var LobbyModel = Backbone.Model.extend({
     });
@@ -55,7 +59,7 @@ $(document).ready(function() {
             var me = this;
 
             // recieve create signal from server
-            socket.on('create', function(lobby) {
+            lobbies_s.on('create', function(lobby) {
                 var lobby_item = new LobbyView({
                     model: new LobbyModel({
                         lobby: lobby
@@ -68,11 +72,11 @@ $(document).ready(function() {
             });
 
             // recieve destroy signal from server
-            socket.on('destroy', function(lobby_id) {
+            lobbies_s.on('destroy', function(lobby_id) {
             });
 
             // recieve lobby update
-            socket.on('update', function(lobby_id, lobby_info) {
+            lobbies_s.on('update', function(lobby_id, lobby_info) {
             });
         },
 
@@ -100,10 +104,10 @@ $(document).ready(function() {
             $.ajax({
                 url: '/_ajax/lobby/all',
                 success: function(data) {
-                },});
+                },
+            });
             // connect to the websocket
-            socket = io.connect('/lobbies');
-            socket.emit('subscribe');
+            lobbies_s.emit('subscribe');
             var view = new LobbiesView({
                 el: $("#container"),
             });

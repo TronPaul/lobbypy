@@ -29,15 +29,15 @@
    <body>
       <div id="wrapper">
          <div id="header">
-            <tal:block tal:condition="hasattr(request, 'player')">
+            <tal:block tal:condition="player">
                <div class="left">
-                  Hello <span tal:content="request.player.name">Name</span>
+                  Hello <span tal:content="player.name">Name</span>
                </div>
                <div class="right">
                   <a href="${request.route_url('logout')}">logout</a>
                </div>
             </tal:block>
-            <tal:block tal:condition="not hasattr(request, 'player')">
+            <tal:block tal:condition="not player">
                <div class="right">
                   <a href="${request.route_url('login')}"><img src="/static/sits_large_border.png"/></a>
                </div>
