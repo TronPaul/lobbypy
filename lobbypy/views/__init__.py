@@ -1,8 +1,7 @@
 from pyramid.httpexceptions import HTTPFound
-from pyramid.events import subscriber, NewRequest
 from pyramid_openid.view import (process_incoming_request,
         process_provider_response)
-from pyramid.security import has_permission, forget, authenticated_userid
+from pyramid.security import forget, authenticated_userid
 
 from ..models import (
         DBSession,
@@ -32,7 +31,11 @@ def index(request):
     """
     Root view for lobbypy
     """
-    return {}
+    user_id = authenticated_userid(request)
+    player = None
+    if user_id is not None:
+        player = DBSession.query(Player).filter(Player.steamid==user_id).first()
+    return dict(player=player)
 
 def login(request):
     """
@@ -53,17 +56,4 @@ def logout(request):
     """
     request.session.invalidate()
     headers = forget(request)
-    del request.player
     return HTTPFound(location=request.route_path('index'), headers=headers)
-
-@subscriber(NewRequest)
-def get_player_from_session(event):
-    """
-    Add player to request for convienence
-    """
-    user_id = authenticated_userid(event.request)
-    if user_id is not None:
-        player = DBSession.query(Player).filter_by(steamid=user_id).first()
-        event.request.player = player
-    elif hasattr(event.request, 'player'):
-        del event.request.player

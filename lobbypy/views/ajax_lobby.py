@@ -38,7 +38,8 @@ def all_lobbies_ajax(request):
     Returns:
     - A list of small lobby objects
     """
-    pass
+    lobbies = DBSession.query(Lobby).all()
+    return dict(lobbies=lobbies)
 
 def lobby_state_ajax(request):
     """
@@ -48,4 +49,6 @@ def lobby_state_ajax(request):
     Returns:
     - A full lobby object
     """
-    pass
+    lobby_id = int(request.matchdict['lobby_id'])
+    lobby = DBSession.query(Lobby).filter(Lobby.id==lobby_id).first()
+    return dict(lobby=lobby)

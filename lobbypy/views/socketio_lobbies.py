@@ -43,7 +43,7 @@ class LobbiesNamespace(BaseNamespace):
                     Update lobby event
                     """
                     log.debug('Redis sending[update] with %s' % data['lobby'])
-                    self.emit('update', data['lobby_id'], data['lobby'])
+                    self.emit('update', data['lobby'])
                 else:
                     log.error('Redis had unknown message type %s' %
                             data['event'])
@@ -58,4 +58,4 @@ class LobbiesNamespace(BaseNamespace):
         """
         Client unsubscribes to Redis
         """
-        pass
+        self.kill_local_jobs()
