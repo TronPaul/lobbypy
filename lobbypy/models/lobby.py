@@ -7,8 +7,9 @@ from sqlalchemy import (
         )
 
 from sqlalchemy.orm import relationship
+from sqlalchemy import event
 
-from . import Base
+from . import Base, PyramidJSONEncoder
 
 spectator_table = Table('spectator', Base.metadata,
         Column('lobby_id', Integer, ForeignKey('lobby.id'), primary_key=True),
@@ -21,7 +22,8 @@ class Lobby(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey('player.steamid'), nullable=False)
-    teams = relationship("Team", backref="lobby")
+    teams = relationship("Team", backref="lobby",
+            cascade='save-update,merge,delete')
     spectators = relationship("Player", secondary=spectator_table)
 
     def __init__(self, name, owner):
@@ -34,8 +36,17 @@ class Lobby(Base):
     def __len__(self):
         return len(spectators) + sum([len(t) for t in self.teams])
 
+    def __json__(self, request):
+        return {
+                'id': self.id,
+                'name': self.name,
+                'owner': self.owner,
+                'teams': self.teams,
+                'spectators': self.spectators,
+                }
+
     def has_player(self, player):
-        return (player in self.spectators or
+        return (any([s is player for s in self.spectators]) or
                 any([t.has_player(player) for t in self.teams]))
 
     def join(self, player):
@@ -56,7 +67,7 @@ class Lobby(Base):
                 raise ValueError('%s is not in %s' % (player, self))
 
     def set_team(self, player, team):
-        if player in self.spectators and team is not None:
+        if any([s.steamid == player.steamid for s in self.spectators]) and team is not None:
             self.spectators.remove(player)
             team.append_player(player)
         else:
@@ -95,7 +106,8 @@ class Team(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     lobby_id = Column(Integer, ForeignKey('lobby.id'), nullable=False)
-    players = relationship("LobbyPlayer", backref="team")
+    players = relationship("LobbyPlayer", backref="team",
+            cascade='save-update,merge,delete')
 
     def __init__(self, name):
         self.name = name
@@ -103,8 +115,15 @@ class Team(Base):
     def __len__(self):
         return len(players)
 
+    def __json__(self, request):
+        return {
+                'name': self.name,
+                'players': self.players,
+                }
+
     def has_player(self, player):
-        return len([lp for lp in self.players if lp.player is player]) > 0
+        return len([lp for lp in self.players
+                if lp.player is player]) > 0
 
     def get_player(self, player):
         return [lp for lp in self.players if lp.player is player].pop()
@@ -167,5 +186,29 @@ class LobbyPlayer(Base):
     player = relationship("Player", uselist=False)
     cls = Column(Integer)
 
-    def __init__(self, player):
+    def __init__(self, player, cls=None):
         self.player = player
+        self.cls = cls
+
+    def __json__(self, request):
+        return {
+                'player': self.player,
+                'class': self.cls,
+                }
+
+def create_event(mapper, connection, target):
+    import redis
+    from json import dumps
+    r = redis.Redis()
+    r.publish('lobbies', dumps(dict(event='create', lobby=target), cls=PyramidJSONEncoder))
+
+def destroy_event(mapper, connection, target):
+    import redis
+    from json import dumps
+    r = redis.Redis()
+    r.publish('lobbies', dumps(dict(event='destroy', lobby_id=target.id), cls=PyramidJSONEncoder))
+    r.publish('lobby/%s' % target.id, dumps(dict(event='destroy'), cls=PyramidJSONEncoder))
+
+# Lobby Create/Destroy
+event.listen(Lobby, 'after_insert', create_event)
+event.listen(Lobby, 'after_delete', destroy_event)

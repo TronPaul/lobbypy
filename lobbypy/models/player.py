@@ -27,6 +27,12 @@ class Player(Base):
             return self._get_avatar_url()
         raise AttributeError(name)
 
+    def __json__(self, request):
+        return {
+                'steamid': self.steamid,
+                'name': self.name
+                }
+
     def _get_persona_name(self):
         return self._get_player_summary()['personaname']
 
