@@ -21,7 +21,8 @@ class Lobby(Base):
     __tablename__ = 'lobby'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    owner_id = Column(Integer, ForeignKey('player.steamid'), nullable=False)
+    owner_id = Column(Integer, ForeignKey('player.steamid'), nullable=False,
+            unique=True)
     teams = relationship("Team", backref="lobby",
             cascade='save-update,merge,delete')
     spectators = relationship("Player", secondary=spectator_table)
@@ -72,7 +73,7 @@ class Team(Base):
     name = Column(String, nullable=False)
     lobby_id = Column(Integer, ForeignKey('lobby.id'), nullable=False)
     players = relationship("LobbyPlayer", backref="team",
-            cascade='save-update,merge,delete')
+            cascade='save-update,merge,delete,delete-orphan')
 
     def __init__(self, name):
         self.name = name
