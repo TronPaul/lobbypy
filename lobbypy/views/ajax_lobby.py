@@ -24,7 +24,7 @@ def create_lobby_ajax(request):
         lobby = controllers.create_lobby(DBSession, name, player)
         transaction.commit()
         lobby = DBSession.merge(lobby)
-        return dict(lobby_id=lobby.id)
+        return lobby.id
 
 def all_lobbies_ajax(request):
     """
@@ -35,7 +35,7 @@ def all_lobbies_ajax(request):
     - A list of small lobby objects
     """
     lobbies = DBSession.query(Lobby).all()
-    return dict(lobbies=lobbies)
+    return lobbies
 
 def lobby_state_ajax(request):
     """
@@ -47,4 +47,4 @@ def lobby_state_ajax(request):
     """
     lobby_id = int(request.matchdict['lobby_id'])
     lobby = DBSession.query(Lobby).filter(Lobby.id==lobby_id).first()
-    return dict(lobby=lobby)
+    return lobby
