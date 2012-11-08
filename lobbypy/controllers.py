@@ -9,6 +9,10 @@ from .models import (
         DBSession
         )
 
+import logging
+
+log = logging.getLogger(__name__)
+
 def redis_update_lobby(success, lobby):
     import redis
     from json import dumps

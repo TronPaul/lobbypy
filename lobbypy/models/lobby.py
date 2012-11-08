@@ -34,7 +34,7 @@ class Lobby(Base):
         self.teams.append(Team('Blue'))
 
     def __len__(self):
-        return len(spectators) + sum([len(t) for t in self.teams])
+        return len(self.spectators) + sum([len(t) for t in self.teams])
 
     def __json__(self, request):
         return {
@@ -66,41 +66,6 @@ class Lobby(Base):
             if len(l) == 0:
                 raise ValueError('%s is not in %s' % (player, self))
 
-    def set_team(self, player, team):
-        if any([s.steamid == player.steamid for s in self.spectators]) and team is not None:
-            self.spectators.remove(player)
-            team.append_player(player)
-        else:
-            old_teams = [t for t in self.teams if t.has_player(player)]
-            # Player found in a single team
-            if len(old_teams) == 1:
-                old_team = old_teams.pop()
-                if team is not None and old_team is not team:
-                    team.append(old_team.pop_player(player))
-                else:
-                    self.spectators.append(player)
-            # Player not found
-            elif len(old_teams) == 0:
-                raise ValueError('%s not in %s' % (player, self))
-            # Should only be one player per team.
-            # BAD THINGS IN DB LAND
-            else:
-                pass
-
-    def set_class(self, player, cls):
-        teams = [t for t in self.teams if t.has_player(player)]
-        # Player found in a single team
-        if len(teams) == 1:
-            teams.pop().set_class(player, cls)
-        # Player not found
-        elif len(teams) == 0:
-            raise ValueError('%s not in %s' % (player, self.teams))
-        # Should only be one player per team.
-        # BAD THINGS IN DB LAND
-        else:
-            # TODO: error
-            pass
-
 class Team(Base):
     __tablename__ = 'team'
     id = Column(Integer, primary_key=True)
@@ -113,7 +78,7 @@ class Team(Base):
         self.name = name
 
     def __len__(self):
-        return len(players)
+        return len(self.players)
 
     def __json__(self, request):
         return {

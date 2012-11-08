@@ -36,9 +36,6 @@ class Player(Base):
     def _get_persona_name(self):
         return self._get_player_summary()['personaname']
 
-    def _get_friends(self):
-        return self._get_friend_list()
-
     def _get_avatar_url(self, size='small'):
         summary = self._get_player_summary()
         if size == 'large':
@@ -52,8 +49,3 @@ class Player(Base):
     def _get_player_summary(self):
         # Do Steam API call to get all data from GetPlayerSummaries for steamid
         return get_player_summary(self.steamid)
-
-    # TODO: cache this
-    def _get_friend_list(self):
-        # Do Steam API call to get all data from GetFriendList for steamid
-        pass

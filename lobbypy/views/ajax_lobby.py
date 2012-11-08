@@ -21,7 +21,6 @@ def create_lobby_ajax(request):
     user_id = authenticated_userid(request)
     with transaction.manager:
         player = DBSession.query(Player).filter(Player.steamid==user_id).first()
-        controllers.leave_old_lobbies(DBSession, player)
         lobby = controllers.create_lobby(DBSession, name, player)
         transaction.commit()
         lobby = DBSession.merge(lobby)
