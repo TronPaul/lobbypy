@@ -21,6 +21,7 @@ def redis_update_lobby(success, lobby):
         lobby = DBSession.merge(lobby)
         r.publish('lobbies', dumps(dict(event='update', lobby=lobby),
                 cls=PyramidJSONEncoder))
+        log.info('Publishing redis[update] to lobby/%s' % lobby.id)
         r.publish('lobby/%s' % lobby.id, dumps(dict(event='update', lobby=lobby),
                 cls=PyramidJSONEncoder))
 
@@ -39,6 +40,7 @@ def redis_destroy_lobby(success, lobby_id):
     if success:
         r = redis.Redis()
         r.publish('lobbies', dumps(dict(event='destroy', lobby_id=lobby_id)))
+        log.info('Publishing redis[destroy] to lobby/%s' % lobby_id)
         r.publish('lobby/%s' % lobby_id, dumps(dict(event='destroy')))
 
 def leave_old_lobbies(session, player):
@@ -85,6 +87,7 @@ def leave(session, lobby, player):
 def set_team(session, lobby, player, team_id):
     current = transaction.get()
     player = session.merge(player)
+    lobby = session.merge(lobby)
     if team_id is not None and player in lobby.spectators:
         lobby.spectators.remove(player)
         team = lobby.teams[team_id]

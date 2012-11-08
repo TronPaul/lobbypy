@@ -22,6 +22,8 @@ class LobbyNamespace(BaseNamespace):
         r = redis.StrictRedis()
         r = r.pubsub()
 
+        log.info('Player[%s] subscribing to lobby/%s' % (self.user_id,
+            lobby_id))
         r.subscribe('lobby/%s' % lobby_id)
 
         for m in r.listen():
@@ -31,11 +33,14 @@ class LobbyNamespace(BaseNamespace):
                     """
                     Lobby update event
                     """
+                    log.debug('Redis sending[update] with %s' % data['lobby'])
+                    self.emit('update', data['lobby'])
                 elif data['event'] == 'destroy':
                     """
                     Lobby destroyed event
                     """
-                    pass
+                    log.debug('Redis sending[destroy]')
+                    self.emit('destroy')
                 else:
                     log.error('Redis had unknown message type %s' %
                                 data['event'])
