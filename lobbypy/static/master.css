@@ -5,3 +5,11 @@
 .left {
     float: left;
 }
+
+.team-title {
+    cursor: pointer;
+}
+
+.spectator-title {
+    cursor: pointer;
+}

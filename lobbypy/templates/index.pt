@@ -10,15 +10,37 @@
       <script src="/static/master.js" type="text/javascript"></script>
       <link href="/static/master.css" rel="stylesheet" type="text/css"/>
       <script id="lobby_template" type="text/x-handlebars-template">
-         {{#with lobby}}
-         <li id="lobby-{{id}}">
-         <div class="lobby_info">{{name}} - {{owner}} - {{player_count}}/18</div> <a href="lobby/{{id}}">Join</a>
-         </li>
-         {{/with}}
+         <h1>{{name}}</h1>
+         <div class="teams">
+         {{#each teams}}
+         <div id="team-{{id}}" class="team">
+            <h3 class="team-title">{{this.name}}</h3>
+            <ul class="team-list">
+               {{#each this.players}}
+               <li>{{this.player.name}} - {{this.class}}</li>
+               {{/each}}
+            </ul>
+         </div>
+         {{/each}}
+         </div>
+         <div class="spectators">
+            <h5 class="spectator-title">Spectators</h5>
+            <ul class="spectator-list">
+               {{#each spectators}}
+               <li>{{this.name}}</li>
+               {{/each}}
+            </ul>
+         </div>
+         <button id="leave">Leave Lobby</button>
       </script>
       <script id="lobbies_template" type="text/x-handlebars-template">
          <h1>Lobbies</h1>
          <ul id="lobbies">
+            {{#each lobbies}}
+            <li id="lobby-{{this.id}}">
+               <div class="lobby_info">{{this.name}} - {{this.owner.name}}</div> <a href="#lobby/{{this.id}}">Join</a>
+            </li>
+            {{/each}}
          </ul>
          <form id="create_lobby_form">
             <input type="text" id="lobby_name"></input>
