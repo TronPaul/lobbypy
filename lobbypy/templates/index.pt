@@ -17,12 +17,26 @@
             <h3 class="team-title">{{this.name}}</h3>
             <ul class="team-list">
                {{#each this.players}}
-               <li>{{this.player.name}} - {{this.class}}</li>
+               <li>{{this.player.name}} - {{#if this.class}}{{this.class}}{{else}}Random{{/if}}</li>
                {{/each}}
             </ul>
          </div>
          {{/each}}
          </div>
+         <div class="classes">
+            <strong>Classes</strong>
+            <ul>
+               <li id="class-1" class="class">Scout</li>
+               <li id="class-2" class="class">Soldier</li>
+               <li id="class-3" class="class">Pyro</li>
+               <li id="class-4" class="class">Demoman</li>
+               <li id="class-5" class="class">Heavy</li>
+               <li id="class-6" class="class">Engineer</li>
+               <li id="class-7" class="class">Medic</li>
+               <li id="class-8" class="class">Sniper</li>
+               <li id="class-9" class="class">Spy</li>
+               <li id="class-0" class="class">Random</li>
+            </ul>
          <div class="spectators">
             <h5 class="spectator-title">Spectators</h5>
             <ul class="spectator-list">
@@ -64,8 +78,12 @@
                   <a href="${request.route_url('login')}"><img src="/static/sits_large_border.png"/></a>
                </div>
             </tal:block>
+            <div class="ticker" style="clear:both">
+                <a href="https://github.com/TronPaul/lobbypy/issues">LobbyPy Issues List</a> (Report and view known issues) -
+                <a href="http://bit.ly/lobbypy-data-rules">LobbyPy Data Rules</a> (Rules the app needs to follow)
+            </div>
          </div>
-         <div id="container" style="clear:both">
+         <div id="container">
          </div>
          <div id="footer">
          </div>
