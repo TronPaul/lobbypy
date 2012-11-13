@@ -1,4 +1,4 @@
-from .util import Base, DBSession, PyramidJSONEncoder
+from .util import Base, DBSession, PyramidJSONEncoder, prep_json_encode
 from .player import Player
 from .lobby import Lobby, Team, LobbyPlayer
 
@@ -9,5 +9,6 @@ __all__ = [
         'Lobby',
         'Team',
         'LobbyPlayer',
-        'PyramidJSONEncoder'
+        'PyramidJSONEncoder',
+        'prep_json_encode',
         ]
