@@ -49,6 +49,7 @@ def leave_old_lobbies(session, player):
             LobbyPlayer.team_id == Team.id,
             LobbyPlayer.player_id == player.steamid).all()
     [leave(session, l, player) for l in old_lobbies]
+    # TODO: send leave to redis
 
 def create_lobby(session, name, player):
     # leave old lobbies
@@ -109,8 +110,12 @@ def set_team(session, lobby, player, team_id):
 
 def set_class(session, lobby, player, cls):
     player = session.merge(player)
-    team = [t for t in lobby.teams
-            if t.has_player(player)].pop()
-    team.set_class(player, cls)
-    current = transaction.get()
-    current.addAfterCommitHook(redis_update_lobby, args=(lobby,))
+    teams = [t for t in lobby.teams
+            if t.has_player(player)]
+    if len(teams) == 0:
+        return
+    team = teams.pop()
+    if not all([lp.cls == cls for lp in team.players]):
+        team.set_class(player, cls)
+        current = transaction.get()
+        current.addAfterCommitHook(redis_update_lobby, args=(lobby,))
