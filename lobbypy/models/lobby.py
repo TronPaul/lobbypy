@@ -95,7 +95,10 @@ class Team(Base):
         return [lp for lp in self.players if lp.player is player].pop()
 
     def append(self, lobby_player):
-        self.players.append(lobby_player)
+        if len(self.players) < 9:
+            self.players.append(lobby_player)
+        else:
+            raise ValueError('%s\'s players list is full' % self)
 
     def remove(self, lobby_player):
         self.players.remove(lobby_player)
