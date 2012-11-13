@@ -16,6 +16,7 @@ $(document).ready(function() {
             "click .team-title": "set_team",
             "click .spectator-title": "set_spectator",
             "click #leave": "leave",
+            "click .class": "set_class",
         },
 
         set_team: function(evt) {
@@ -23,6 +24,16 @@ $(document).ready(function() {
 
             team_id = $(evt.currentTarget).parent().attr("id").slice(-1);
             lobby_s.emit('set_team', team_id);
+        },
+
+        set_class: function(evt) {
+            evt.preventDefault();
+
+            class_id = $(evt.currentTarget).attr("id").slice(-1);
+            if (class_id == 0) {
+                class_id = undefined;
+            }
+            lobby_s.emit('set_class', class_id);
         },
 
         set_spectator: function(evt) {
@@ -135,6 +146,12 @@ $(document).ready(function() {
                 lobby_old = lobby;
                 me.render();
             });
+
+            // recieve update all lobbies
+            lobbies_s.on('update_all', function(lobbies) {
+                me.collection = lobbies;
+                me.render();
+            });
         },
 
         render: function() {
@@ -162,14 +179,6 @@ $(document).ready(function() {
                 collection: [],
             });
             view.render();
-            // get lobbies via ajax
-            $.ajax({
-                url: '/_ajax/lobby/all',
-                success: function(lobbies) {
-                    view.collection = lobbies;
-                    view.render();
-                },
-            });
             // connect to the websocket
             lobbies_s.emit('subscribe');
         },
@@ -181,16 +190,9 @@ $(document).ready(function() {
                 model: {},
             });
 
-            // get lobby via ajax
-            $.ajax({
-                url: '/_ajax/lobby/' + lobby_id,
-                success: function(lobby) {
-                    view.model = lobby;
-                    view.render();
-                    lobbies_s.emit('unsubscribe');
-                    lobby_s.emit('join', lobby_id);
-                },
-            });
+            // join lobby
+            lobbies_s.emit('unsubscribe');
+            lobby_s.emit('join', lobby_id);
         },
     });
 

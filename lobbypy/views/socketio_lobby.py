@@ -5,7 +5,7 @@ from pyramid.security import authenticated_userid
 
 from socketio.namespace import BaseNamespace
 
-from ..models import DBSession, Player, Lobby
+from ..models import DBSession, Player, Lobby, prep_json_encode
 from .. import controllers
 
 log = logging.getLogger(__name__)
@@ -52,16 +52,19 @@ class LobbyNamespace(BaseNamespace):
         log.debug('Using Session[%s]' % DBSession)
         # If we have a player, do the join
         user_id = self.user_id
+        lobby = DBSession.query(Lobby).filter_by(id=lobby_id).first()
         if user_id:
             with transaction.manager:
+                lobby = DBSession.merge(lobby)
                 player = DBSession.query(Player).filter(
                         Player.steamid==user_id).first()
-                lobby = DBSession.query(Lobby).filter_by(id=lobby_id).first()
                 # Request join
                 controllers.join(DBSession, lobby, player)
                 transaction.commit()
                 self.lobby_id = lobby_id
         # Cause other sockets to leave / Kill the socket listener
+        lobby = DBSession.merge(lobby)
+        self.emit('update', prep_json_encode(lobby))
         self.spawn(self.listener, lobby_id)
 
     def on_leave(self):

@@ -1,9 +1,10 @@
 import redis, logging
-from json import loads, dumps
 
 from mongoengine import OperationError
 
 from socketio.namespace import BaseNamespace
+
+from lobbypy.models import DBSession, Lobby, prep_json_encode
 
 log = logging.getLogger(__name__)
 
@@ -11,9 +12,6 @@ class LobbiesNamespace(BaseNamespace):
     """
     Namespace for lobby listing
     """
-    def initialize(self):
-        self.player = self.request.player if hasattr(self.request, 'player') else None
-
     def listener(self):
         """
         Redis subscription loop
@@ -52,6 +50,9 @@ class LobbiesNamespace(BaseNamespace):
         """
         Client subscribes to Redis
         """
+        log.info('Client subscribing to lobbies namespace')
+        lobbies = prep_json_encode(DBSession.query(Lobby).all())
+        self.emit('update_all', lobbies)
         self.spawn(self.listener)
 
     def on_unsubscribe(self):
