@@ -1,8 +1,9 @@
 import transaction
 
 from pyramid.security import authenticated_userid
+from sqlalchemy.orm import joinedload_all
 
-from ..models import DBSession, Lobby, Player
+from ..models import DBSession, Lobby, Player, Team, LobbyPlayer
 from .. import controllers
 
 import logging
@@ -34,7 +35,12 @@ def all_lobbies_ajax(request):
     Returns:
     - A list of small lobby objects
     """
-    lobbies = DBSession.query(Lobby).all()
+    lobbies = DBSession.query(Lobby).options(
+            joinedload_all(Lobby.owner),
+            joinedload_all(Lobby.teams, Team.players,
+                    LobbyPlayer.player),
+            joinedload_all(Lobby.spectators)
+            ).all()
     return lobbies
 
 def lobby_state_ajax(request):
@@ -46,5 +52,10 @@ def lobby_state_ajax(request):
     - A full lobby object
     """
     lobby_id = int(request.matchdict['lobby_id'])
-    lobby = DBSession.query(Lobby).filter(Lobby.id==lobby_id).first()
+    lobby = DBSession.query(Lobby).filter(Lobby.id==lobby_id).options(
+            joinedload_all(Lobby.owner),
+            joinedload_all(Lobby.teams, Team.players,
+                    LobbyPlayer.player),
+            joinedload_all(Lobby.spectators)
+            ).first()
     return lobby
