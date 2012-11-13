@@ -45,6 +45,22 @@ class LobbyNamespace(BaseNamespace):
                     log.error('Redis had unknown message type %s' %
                                 data['event'])
 
+    def disconnect(self, *args, **kwargs):
+        """
+        Player disconnects from socketio service
+        Do cleanup
+        """
+        user_id = self.user_id
+        lobby_id = self.lobby_id
+        if user_id is not None and lobby_id is not None:
+            with transaction.manager:
+                lobby = DBSession.query(Lobby).filter_by(id=lobby_id).first()
+                player = DBSession.query(Player).filter(
+                        Player.steamid==user_id).first()
+                controllers.leave(DBSession, lobby, player)
+                transaction.commit()
+        super(LobbyNamespace, self).disconnect(*args, **kwargs)
+
     def on_join(self, lobby_id):
         """
         Player joins lobby
