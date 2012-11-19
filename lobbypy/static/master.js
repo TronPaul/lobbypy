@@ -17,6 +17,8 @@ $(document).ready(function() {
             "click .spectator-title": "set_spectator",
             "click #leave": "leave",
             "click .class": "set_class",
+            "click #toggle-ready": "toggle_ready",
+            "click #start-lobby": "start_lobby",
         },
 
         set_team: function(evt) {
@@ -41,10 +43,19 @@ $(document).ready(function() {
             lobby_s.emit('set_team', undefined);
         },
 
+        toggle_ready: function(evt) {
+            evt.preventDefault();
+            lobby_s.emit('toggle_ready');
+        },
+
+        start_lobby: function(evt) {
+            evt.preventDefault();
+            lobby_s.emit('start');
+        },
+
         leave: function(evt) {
             evt.preventDefault();
             lobby_s.emit('leave');
-            this.undelegateEvents();
             window.location.hash = "#";
         },
 
@@ -60,8 +71,14 @@ $(document).ready(function() {
                 window.location.hash = '#';
             });
 
-            lobby_s.on('update', function(lobby) {
-                me.model = lobby;
+            lobby_s.on('update', function(me_lp, lobby) {
+                me_lp.is_ready = lobby.is_ready;
+                me_lp.is_lock = lobby.lock;
+                model = {
+                    lobby: lobby,
+                    me: me_lp,
+                };
+                me.model = model;
                 me.render();
             });
         },
@@ -71,7 +88,7 @@ $(document).ready(function() {
 
             var template = Handlebars.compile($("#lobby_template").html());
 
-            $.each(this.model.teams, function(index, value) {
+            $.each(this.model.lobby.teams, function(index, value) {
                 value.id = index;
             });
 

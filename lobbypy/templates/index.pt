@@ -10,6 +10,7 @@
       <script src="/static/master.js" type="text/javascript"></script>
       <link href="/static/master.css" rel="stylesheet" type="text/css"/>
       <script id="lobby_template" type="text/x-handlebars-template">
+         {{#with lobby}}
          <h1>{{name}}</h1>
          <div class="teams">
          {{#each teams}}
@@ -17,7 +18,7 @@
             <h3 class="team-title">{{this.name}}</h3>
             <ul class="team-list">
                {{#each this.players}}
-               <li>{{this.player.name}} - {{#if this.class}}{{this.class}}{{else}}Random{{/if}}</li>
+               <li>{{this.player.name}} - {{#if this.class}}{{this.class}}{{else}}Random{{/if}} - {{#if this.ready}}Ready{{else}}Not Ready{{/if}}</li>
                {{/each}}
             </ul>
          </div>
@@ -45,7 +46,26 @@
                {{/each}}
             </ul>
          </div>
+         {{/with}}
          <button id="leave">Leave Lobby</button>
+         {{#with me}}
+         {{#if this.on_team}}
+         <button id="toggle-ready">{{#if this.ready}}Not Ready{{else}}Ready{{/if}}</button>
+         {{else}}
+         <button disabled="disabled" id="toggle-ready">Ready</button>
+         {{/if}}
+         {{#if this.is_leader}}
+         {{#if is_ready}}
+         {{#if is_lock}}
+         <button disabled="disabled" id="start-lobby">Starting Lobby...</button>
+         {{else}}
+         <button id="start-lobby">Start Lobby</button>
+         {{/if}}
+         {{else}}
+         <button disabled="disabled" id="start-lobby">Start Lobby</button>
+         {{/if}}
+         {{/if}}
+         {{/with}}
       </script>
       <script id="lobbies_template" type="text/x-handlebars-template">
          <h1>Lobbies</h1>

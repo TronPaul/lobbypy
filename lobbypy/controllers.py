@@ -1,4 +1,5 @@
-from sqlalchemy import event
+from sqlalchemy import event, or_, and_
+from sqlalchemy.orm import joinedload
 import transaction
 
 from .models import (
@@ -6,7 +7,8 @@ from .models import (
         Team,
         LobbyPlayer,
         PyramidJSONEncoder,
-        DBSession
+        DBSession,
+        spectator_table,
         )
 
 import logging
@@ -44,15 +46,31 @@ def redis_destroy_lobby(success, lobby_id):
         r.publish('lobby/%s' % lobby_id, dumps(dict(event='destroy')))
 
 def leave_old_lobbies(session, player):
-    old_lobbies = session.query(Lobby).filter(
+    """
+    Leave all existing lobbies
+    """
+    spec_lobbies = session.query(Lobby).\
+            options(joinedload('spectators')).\
+            filter(and_(Lobby.id == spectator_table.c.lobby_id,
+            spectator_table.c.player_id == player.steamid
+            )).all()
+    player_lobbies = session.query(Lobby).\
+            options(joinedload('teams'),
+                    joinedload('teams.players'),
+                    joinedload('teams.players.player')).\
+            filter(and_(
             Lobby.id == Team.lobby_id,
             LobbyPlayer.team_id == Team.id,
-            LobbyPlayer.player_id == player.steamid).all()
-    [leave(session, l, player) for l in old_lobbies]
-    # TODO: send leave to redis
+            LobbyPlayer.player_id == player.steamid
+            )).all()
+    [leave(session, l, player) for l in spec_lobbies]
+    [leave(session, l, player) for l in player_lobbies]
 
 def create_lobby(session, name, player):
-    # leave old lobbies
+    """
+    Create a lobby in the database
+    """
+    log.info('Player[%s] creating lobby' % player.steamid)
     leave_old_lobbies(session, player)
     # create lobby
     lobby = Lobby(name, player)
@@ -62,22 +80,43 @@ def create_lobby(session, name, player):
     return lobby
 
 def destroy_lobby(session, lobby):
+    """
+    Delete a lobby from the database
+    """
     lobby_id = lobby.id
+    log.info('Destroying Lobby[%s]' % lobby_id)
     session.delete(lobby)
     current = transaction.get()
     current.addAfterCommitHook(redis_destroy_lobby, args=(lobby_id,))
 
+def lock_lobby(session, lobby):
+    """
+    Lock lobby, preventing changes
+    """
+    if lobby.is_ready():
+        lobby.lock = True
+        current = transaction.get()
+        current.addAfterCommitHook(redis_update_lobby, args=(lobby,))
+
 def join(session, lobby, player):
+    """
+    Add a player to lobby
+    """
     if lobby.has_player(player):
         return
     # leave old lobbies
     leave_old_lobbies(session, player)
     # join lobby
+    log.info('Player[%s] joinling Lobby[%s]' % (player.steamid, lobby.id))
     lobby.join(player)
     current = transaction.get()
     current.addAfterCommitHook(redis_update_lobby, args=(lobby,))
 
 def leave(session, lobby, player):
+    """
+    Remove a player from lobby
+    """
+    log.info('Player[%s] leaving Lobby[%s]' % (player.steamid, lobby.id))
     if lobby.owner is player:
         destroy_lobby(session, lobby)
     else:
@@ -86,36 +125,32 @@ def leave(session, lobby, player):
         current.addAfterCommitHook(redis_update_lobby, args=(lobby,))
 
 def set_team(session, lobby, player, team_id):
+    """
+    Set a player's team in lobby
+    """
     current = transaction.get()
-    player = session.merge(player)
-    lobby = session.merge(lobby)
-    if team_id is not None and player in lobby.spectators:
-        lobby.spectators.remove(player)
-        team = lobby.teams[team_id]
-        team.append_player(player)
-        current.addAfterCommitHook(redis_update_lobby, args=(lobby,))
-    else:
-        old_team = [t for t in lobby.teams
-                if t.has_player(player)].pop()
-        if team_id is None:
-            old_team.remove_player(player)
-            lobby.spectators.append(player)
-            current.addAfterCommitHook(redis_update_lobby, args=(lobby,))
-        else:
-            new_team = lobby.teams[team_id]
-            if old_team is not new_team:
-                old_lp = old_team.pop_player(player)
-                new_team.append(old_lp)
-                current.addAfterCommitHook(redis_update_lobby, args=(lobby,))
+    log.info('Player[%s] setting team to %s in Lobby[%s]' % (player.steamid,
+        team_id, lobby.id))
+    lobby.set_team(player, team_id)
+    current = transaction.get()
+    current.addAfterCommitHook(redis_update_lobby, args=(lobby,))
 
 def set_class(session, lobby, player, cls):
-    player = session.merge(player)
-    teams = [t for t in lobby.teams
-            if t.has_player(player)]
-    if len(teams) == 0:
-        return
-    team = teams.pop()
-    if not all([lp.cls == cls for lp in team.players]):
-        team.set_class(player, cls)
-        current = transaction.get()
-        current.addAfterCommitHook(redis_update_lobby, args=(lobby,))
+    """
+    Set a player's class in lobby
+    """
+    log.info('Player[%s] setting class to %s in Lobby[%s]' % (player.steamid,
+        cls, lobby.id))
+    if lobby.on_team(player) and not lobby.get_team(player).has_class(cls):
+        lobby.set_class(player, cls)
+        transaction.get().addAfterCommitHook(redis_update_lobby, args=(lobby,))
+
+def toggle_ready(session, lobby, player):
+    """
+    Toggle a ready for a player in lobby
+    """
+    log.info('Player[%s] toggling ready in Lobby[%s]' % (player.steamid,
+        lobby.id))
+    if lobby.on_team(player):
+        lobby.toggle_ready(player)
+        transaction.get().addAfterCommitHook(redis_update_lobby, args=(lobby,))

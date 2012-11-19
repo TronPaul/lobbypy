@@ -1,4 +1,5 @@
 import redis, logging
+from json import loads
 
 from mongoengine import OperationError
 
