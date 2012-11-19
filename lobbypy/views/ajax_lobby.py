@@ -20,13 +20,14 @@ def create_lobby_ajax(request):
     """
     name = request.params['name']
     user_id = authenticated_userid(request)
-    log.info('Player[%s] posted create_lobby_ajax(%s)' % (user_id, name))
-    with transaction.manager:
-        player = DBSession.query(Player).filter(Player.steamid==user_id).first()
-        lobby = controllers.create_lobby(DBSession, name, player)
-        transaction.commit()
-        lobby = DBSession.merge(lobby)
-        return lobby.id
+    if user_id is not None:
+        log.info('Player[%s] posted create_lobby_ajax(%s)' % (user_id, name))
+        with transaction.manager:
+            player = DBSession.query(Player).filter(Player.steamid==user_id).first()
+            lobby = controllers.create_lobby(DBSession, name, player)
+            transaction.commit()
+            lobby = DBSession.merge(lobby)
+            return lobby.id
 
 def all_lobbies_ajax(request):
     """
