@@ -24,7 +24,11 @@ class TeamModelTest(unittest.TestCase):
         self.assertEquals(len(instance), 1)
 
     def test_json(self):
-        pass
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        info = instance.__json__(None)
+        self.assertEquals(info['name'], 'Red')
+        self.assertEquals(len(info['players']), 0)
 
     def test_has_player(self):
         from lobbypy.models import Player, LobbyPlayer
@@ -34,6 +38,14 @@ class TeamModelTest(unittest.TestCase):
         instance.players.append(lp)
         self.assertTrue(instance.has_player(player))
 
+    def test_has_class(self):
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        player = Player(1)
+        lp = LobbyPlayer(player, 1)
+        instance.players.append(lp)
+        self.assertTrue(instance.has_class(1))
+
     def test_get_player(self):
         from lobbypy.models import Player, LobbyPlayer
         instance = self._makeOne()
@@ -41,6 +53,21 @@ class TeamModelTest(unittest.TestCase):
         lp = LobbyPlayer(player)
         instance.players.append(lp)
         self.assertEquals(instance.get_player(player), lp)
+
+    def test_get_player_does_not_exist(self):
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        player = Player(1)
+        self.assertRaises(ValueError, instance.get_player, player)
+
+    def test_get_player_dupe_player(self):
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        player = Player(1)
+        lp = LobbyPlayer(player)
+        instance.players.append(lp)
+        instance.players.append(lp)
+        self.assertRaises(ValueError, instance.get_player, player)
 
     def test_append(self):
         from lobbypy.models import Player, LobbyPlayer
@@ -50,6 +77,15 @@ class TeamModelTest(unittest.TestCase):
         instance.append(lp)
         self.assertEquals(len(instance.players), 1)
         self.assertEquals(instance.players[0], lp)
+
+    def test_append_full(self):
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        player = Player(1)
+        lp = LobbyPlayer(player)
+        for i in range(9):
+            instance.players.append(lp)
+        self.assertRaises(ValueError, instance.append, lp)
 
     def test_remove(self):
         from lobbypy.models import Player, LobbyPlayer
@@ -77,6 +113,45 @@ class TeamModelTest(unittest.TestCase):
         self.assertEquals(instance.pop_player(player), lp)
         self.assertEquals(len(instance.players), 0)
 
+    def test_pop_player_does_not_exist(self):
+        from lobbypy.models import Player
+        instance = self._makeOne()
+        player = Player(1)
+        self.assertRaises(ValueError, instance.pop_player, player)
+
+    def test_pop_player_dupe_player(self):
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        player = Player(1)
+        lp = LobbyPlayer(player)
+        instance.players.append(lp)
+        instance.players.append(lp)
+        self.assertRaises(ValueError, instance.pop_player, player)
+
+    def test_remove_player(self):
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        player = Player(1)
+        lp = LobbyPlayer(player)
+        instance.players.append(lp)
+        instance.remove_player(player)
+        self.assertEquals(len(instance.players), 0)
+
+    def test_remove_player_does_not_exist(self):
+        from lobbypy.models import Player
+        instance = self._makeOne()
+        player = Player(1)
+        self.assertRaises(ValueError, instance.remove_player, player)
+
+    def test_remove_player_dupe_player(self):
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        player = Player(1)
+        lp = LobbyPlayer(player)
+        instance.players.append(lp)
+        instance.players.append(lp)
+        self.assertRaises(ValueError, instance.remove_player, player)
+
     def test_remove_player(self):
         from lobbypy.models import Player, LobbyPlayer
         instance = self._makeOne()
@@ -87,4 +162,30 @@ class TeamModelTest(unittest.TestCase):
         self.assertEquals(len(instance.players), 0)
 
     def test_set_class(self):
-        pass
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        player = Player(1)
+        lp = LobbyPlayer(player)
+        instance.players.append(lp)
+        instance.set_class(player, 1)
+        self.assertEquals(instance.players[0].cls, 1)
+
+    def test_set_class_bad_class(self):
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        player = Player(1)
+        lp = LobbyPlayer(player)
+        instance.players.append(lp)
+        self.assertRaises(ValueError, instance.set_class, player, 0)
+
+    def test_set_class_dupe_class(self):
+        from lobbypy.models import Player, LobbyPlayer
+        instance = self._makeOne()
+        playerA = Player(1)
+        lpA = LobbyPlayer(playerA, 1)
+        instance.players.append(lpA)
+        playerB = Player(2)
+        lpB = LobbyPlayer(playerB)
+        instance.players.append(lpB)
+        self.assertRaises(ValueError, instance.set_class, playerB, 1)
+

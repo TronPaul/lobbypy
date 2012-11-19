@@ -54,7 +54,7 @@ class AjaxCreateTests(unittest.TestCase):
                     1, permissive=True)
             info = self._callFUT(request)
             lobby = self.session.query(Lobby).first()
-            self.assertEquals(info['lobby_id'], lobby.id)
+            self.assertEquals(info, lobby.id)
 
         def test_duplicate_owners(self):
             from lobbypy.models import Lobby, Player
@@ -68,7 +68,7 @@ class AjaxCreateTests(unittest.TestCase):
                     1, permissive=True)
             info = self._callFUT(request)
             lobby = self.session.query(Lobby).first()
-            self.assertEquals(info['lobby_id'], lobby.id)
+            self.assertEquals(info, lobby.id)
 
 class AjaxAllLobbiesTests(unittest.TestCase):
         def setUp(self):
@@ -90,9 +90,8 @@ class AjaxAllLobbiesTests(unittest.TestCase):
             self.session.add(lobby)
             request = testing.DummyRequest()
             info = self._callFUT(request)
-            self.assertTrue('lobbies' in info)
-            self.assertEquals(len(info['lobbies']), 1)
-            self.assertEquals(info['lobbies'][0], lobby)
+            self.assertEquals(len(info), 1)
+            self.assertEquals(info[0], lobby)
 
 class AjaxLobbyStateTests(unittest.TestCase):
         def setUp(self):
@@ -115,5 +114,4 @@ class AjaxLobbyStateTests(unittest.TestCase):
             request = testing.DummyRequest()
             request.matchdict['lobby_id'] =1
             info = self._callFUT(request)
-            self.assertTrue('lobby' in info)
-            self.assertEquals(info['lobby'], lobby)
+            self.assertEquals(info, lobby)
