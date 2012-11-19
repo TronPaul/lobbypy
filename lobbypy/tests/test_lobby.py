@@ -44,6 +44,7 @@ class LobbyModelTest(unittest.TestCase):
             player = Player(i)
             class_num = i % 9 + 1
             lp = LobbyPlayer(player, class_num)
+            lp.ready = True
             team_num = 0 if i < 9 else 1
             instance.teams[team_num].append(lp)
         self.assertTrue(instance.is_ready())

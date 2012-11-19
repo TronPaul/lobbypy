@@ -60,7 +60,7 @@ class Lobby(Base):
         """
         Return if the Lobby ready to be started
         """
-        return all([len(t) == 9 for t in self.teams])
+        return all([t.is_ready() for t in self.teams])
 
     def has_player(self, player):
         """
@@ -173,6 +173,13 @@ class Team(Base):
                 'name': self.name,
                 'players': self.players,
                 }
+
+    def is_ready(self):
+        """
+        Return if the Team is ready
+        """
+        return (len(self.players) == 9 and
+                all([lp.ready for lp in self.players]))
 
     def has_player(self, player):
         """

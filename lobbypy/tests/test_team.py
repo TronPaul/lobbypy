@@ -30,6 +30,18 @@ class TeamModelTest(unittest.TestCase):
         self.assertEquals(info['name'], 'Red')
         self.assertEquals(len(info['players']), 0)
 
+    def test_is_ready(self):
+        from lobbypy.models import Player, LobbyPlayer
+        player = Player(0)
+        instance = self._makeOne()
+        for i in range(9):
+            player = Player(i)
+            class_num = i % 9 + 1
+            lp = LobbyPlayer(player, class_num)
+            lp.ready = True
+            instance.players.append(lp)
+        self.assertTrue(instance.is_ready())
+
     def test_has_player(self):
         from lobbypy.models import Player, LobbyPlayer
         instance = self._makeOne()
@@ -188,4 +200,3 @@ class TeamModelTest(unittest.TestCase):
         lpB = LobbyPlayer(playerB)
         instance.players.append(lpB)
         self.assertRaises(ValueError, instance.set_class, playerB, 1)
-
