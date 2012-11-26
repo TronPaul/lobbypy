@@ -52,6 +52,7 @@ class AjaxCreateTests(unittest.TestCase):
             request.params['name'] = 'name'
             request.params['rcon_server'] = ''
             request.params['rcon_pass'] = ''
+            request.params['game_map'] = ''
             self.config.testing_securitypolicy(userid=
                     1, permissive=True)
             info = self._callFUT(request)
@@ -65,6 +66,7 @@ class AjaxCreateTests(unittest.TestCase):
             request.params['name'] = 'name'
             request.params['rcon_server'] = ''
             request.params['rcon_pass'] = ''
+            request.params['game_map'] = ''
             player = self.session.query(Player).first()
             lobby = Lobby('OG Lobby', player, '', '', '')
             self.session.add(lobby)

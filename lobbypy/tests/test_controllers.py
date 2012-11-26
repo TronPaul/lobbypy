@@ -29,7 +29,7 @@ class ControllerTest(unittest.TestCase):
         from lobbypy.models import Player, Lobby
         player = self.session.query(Player).first()
         from lobbypy.controllers import create_lobby
-        create_lobby(self.session, 'Lobby', player, '', False)
+        create_lobby(self.session, 'Lobby', player, '', '', False)
         lobby = self.session.query(Lobby).first()
         self.assertEquals(lobby.name, 'Lobby')
         self.assertEquals(lobby.owner, player)
@@ -42,7 +42,7 @@ class ControllerTest(unittest.TestCase):
         transaction.commit()
         from lobbypy.controllers import create_lobby
         player = self.session.merge(player)
-        create_lobby(self.session, 'Lobby', player, '', False)
+        create_lobby(self.session, 'Lobby', player, '', '', False)
         self.assertEquals(self.session.query(Lobby).count(), 1)
         lobby = self.session.query(Lobby).first()
         self.assertEquals(lobby.name, 'Lobby')
