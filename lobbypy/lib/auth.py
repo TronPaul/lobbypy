@@ -3,8 +3,7 @@ from pyramid.security import remember
 from bson.objectid import ObjectId
 import re, logging, transaction
 
-from ..models.player import Player
-from ..models import DBSession
+from ..models import Player, DBSession
 
 log = logging.getLogger(__name__)
 

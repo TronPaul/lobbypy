@@ -10,21 +10,30 @@ import logging
 
 log = logging.getLogger(__name__)
 
-def create_lobby_ajax(request):
+def create_lobby_ajax(request, init_server=True):
     """
     Player requests lobby creation
     Params:
     - name
+    - rcon_pass
+    - rcon_server_port
     Returns:
     - A Lobby id
     """
     name = request.params['name']
+    rcon_pass = request.params['rcon_pass']
+    rcon_server_port = request.params['rcon_server']
+    game_map = request.params['game_map']
     user_id = authenticated_userid(request)
     if user_id is not None:
         log.info('Player[%s] posted create_lobby_ajax(%s)' % (user_id, name))
         with transaction.manager:
             player = DBSession.query(Player).filter(Player.steamid==user_id).first()
-            lobby = controllers.create_lobby(DBSession, name, player)
+            lobby = controllers.create_lobby(DBSession, name, player, '%s@%s' %
+                    (rcon_pass, rcon_server_port), game_map, init_server)
+            if lobby is None:
+                # TODO: return error code
+                return
             transaction.commit()
             lobby = DBSession.merge(lobby)
             return lobby.id

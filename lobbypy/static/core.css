@@ -1,0 +1,76 @@
+body {
+    color: #ffffff;
+    background-color: #342F2C;
+}
+
+a {
+    color: #f8b98a;
+}
+
+.header-wrapper {
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    padding: 5px 0;
+}
+
+.lobby-item {
+    background-color: #452C25;
+    padding: 5px;
+    border-color: #DABDAB;
+    color: #f6e7de;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.lobbies-title {
+    padding-left: 5px;
+}
+
+.lobby-item:hover {
+    background-color: #ef9849;
+}
+
+.lobby-listing-wrapper {
+    width: 640px;
+}
+
+.lobby-listing {
+    list-style-type: none;
+    padding: 5px;
+}
+
+.class-icon {
+    vertical-align: inherit;
+}
+
+.player-class {
+    cursor: pointer;
+}
+
+.right {
+    float: right;
+}
+
+.left {
+    float: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.bottom {
+    vertical-align: bottom;
+}
+
+.clear {
+    clear: both;
+}
+
+.team-title {
+    cursor: pointer;
+}
+
+.spectator-title {
+    cursor: pointer;
+}

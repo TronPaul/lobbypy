@@ -12,7 +12,7 @@ Developing
 Prior to the steps below, make sure you have [Python 2.7](http://www.python.org/download/),
 [easy\_install (aka setuptools)](http://pypi.python.org/pypi/setuptools/), and
 [virtualenv](http://pypi.python.org/pypi/virtualenv/).  You will also need a
-[mongodb](http://www.mongodb.org/) server and a [Steam API key](http://steamcommunity.com/dev/apikey)
+redis server and a [Steam API key](http://steamcommunity.com/dev/apikey)
 
 1. Create a virtualenv for lobbypy:
 
@@ -48,13 +48,6 @@ To check the current test coverage of lobbypy:
 2. Run nosetests:
 
         $../bin/nosetests
-
-   Optional add `--cover-html` arguement to generate html pages describing coverage
-
-Developer To Do List
---------------------
-
-See lobbypy's [Trello board](https://trello.com/b/g6qXAm1M)
 
 Reporting Issues & Requesting Features
 --------------------------------------

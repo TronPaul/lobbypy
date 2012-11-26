@@ -29,7 +29,7 @@ class ControllerTest(unittest.TestCase):
         from lobbypy.models import Player, Lobby
         player = self.session.query(Player).first()
         from lobbypy.controllers import create_lobby
-        create_lobby(self.session, 'Lobby', player)
+        create_lobby(self.session, 'Lobby', player, '', False)
         lobby = self.session.query(Lobby).first()
         self.assertEquals(lobby.name, 'Lobby')
         self.assertEquals(lobby.owner, player)
@@ -37,12 +37,12 @@ class ControllerTest(unittest.TestCase):
     def test_create_lobby_old_lobbies(self):
         from lobbypy.models import Player, Lobby
         player = self.session.query(Player).first()
-        lobby = Lobby('Lobby', player)
+        lobby = Lobby('Lobby', player, '', '', '')
         self.session.add(lobby)
         transaction.commit()
         from lobbypy.controllers import create_lobby
         player = self.session.merge(player)
-        create_lobby(self.session, 'Lobby', player)
+        create_lobby(self.session, 'Lobby', player, '', False)
         self.assertEquals(self.session.query(Lobby).count(), 1)
         lobby = self.session.query(Lobby).first()
         self.assertEquals(lobby.name, 'Lobby')
@@ -51,7 +51,7 @@ class ControllerTest(unittest.TestCase):
     def test_destroy_lobby(self):
         from lobbypy.models import Player, Lobby
         player = self.session.query(Player).first()
-        lobby = Lobby('Lobby', player)
+        lobby = Lobby('Lobby', player, '', '', '')
         self.session.add(lobby)
         transaction.commit()
         from lobbypy.controllers import destroy_lobby
@@ -67,7 +67,7 @@ class ControllerTest(unittest.TestCase):
         playerA = self.session.query(Player).first()
         playerB = Player(2)
         self.session.add(playerB)
-        lobby = Lobby('Lobby', playerA)
+        lobby = Lobby('Lobby', playerA, '', '', '')
         self.session.add(lobby)
         transaction.commit()
         from lobbypy.controllers import join
@@ -86,8 +86,8 @@ class ControllerTest(unittest.TestCase):
         playerC = Player(3)
         self.session.add(playerB)
         self.session.add(playerC)
-        lobbyA = Lobby('Lobby', playerA)
-        lobbyB = Lobby('Lobby', playerB)
+        lobbyA = Lobby('Lobby', playerA, 'A', '', '')
+        lobbyB = Lobby('Lobby', playerB, 'B', '', '')
         lobbyA.spectators.append(playerC)
         self.session.add(lobbyA)
         self.session.add(lobbyB)
@@ -108,7 +108,7 @@ class ControllerTest(unittest.TestCase):
         playerA = self.session.query(Player).first()
         playerB = Player(2)
         self.session.add(playerB)
-        lobby = Lobby('Lobby', playerA)
+        lobby = Lobby('Lobby', playerA, '', '', '')
         lobby.spectators.append(playerB)
         self.session.add(lobby)
         transaction.commit()
@@ -124,7 +124,7 @@ class ControllerTest(unittest.TestCase):
     def test_set_team(self):
         from lobbypy.models import Player, Lobby
         player = self.session.query(Player).first()
-        lobby = Lobby('Lobby', player)
+        lobby = Lobby('Lobby', player, '', '', '')
         self.session.add(lobby)
         transaction.commit()
         from lobbypy.controllers import set_team
@@ -139,7 +139,7 @@ class ControllerTest(unittest.TestCase):
     def test_set_class(self):
         from lobbypy.models import Player, Lobby
         player = self.session.query(Player).first()
-        lobby = Lobby('Lobby', player)
+        lobby = Lobby('Lobby', player, '', '', '')
         lobby.set_team(player, 0)
         self.session.add(lobby)
         transaction.commit()
@@ -155,7 +155,7 @@ class ControllerTest(unittest.TestCase):
     def test_toggle_ready(self):
         from lobbypy.models import Player, Lobby
         player = self.session.query(Player).first()
-        lobby = Lobby('Lobby', player)
+        lobby = Lobby('Lobby', player, '', '', '')
         lobby.set_team(player, 0)
         self.session.add(lobby)
         transaction.commit()

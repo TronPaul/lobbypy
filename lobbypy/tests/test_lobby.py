@@ -10,7 +10,7 @@ class LobbyModelTest(unittest.TestCase):
         from lobbypy.models import Player
         if player is None:
             player = Player(1)
-        return self._getTargetClass()(name, player)
+        return self._getTargetClass()(name, player, '', '', '')
 
     def test_create(self):
         instance = self._makeOne()

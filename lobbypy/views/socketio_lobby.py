@@ -6,7 +6,13 @@ from pyramid.security import authenticated_userid
 
 from socketio.namespace import BaseNamespace
 
-from ..models import DBSession, Player, Lobby, prep_json_encode
+from ..models import (
+        DBSession,
+        Player,
+        Lobby,
+        prep_json_encode,
+        PyramidJSONEncoder,
+        )
 from .. import controllers
 
 log = logging.getLogger(__name__)
@@ -93,6 +99,11 @@ class LobbyNamespace(BaseNamespace):
                     log.debug('Redis sending[destroy]')
                     self.emit('destroy')
                     self.lobby_id = None
+                elif data['event'] == 'start':
+                    """
+                    Lobby start event
+                    """
+                    log.debug('Redis sending[start]')
                 else:
                     log.error('Redis had unknown message type %s' %
                                 data['event'])
@@ -126,29 +137,31 @@ class LobbyNamespace(BaseNamespace):
         log.info('Player[%s] emitted join(%s)' % (self.user_id, lobby_id))
         # If we have a player, do the join
         user_id = self.user_id
-        if user_id:
-            with transaction.manager:
-                lobby = DBSession.query(Lobby).\
-                        options(joinedload('owner'),
-                                 joinedload('spectators'),
-                                 joinedload('teams'),
-                                 joinedload('teams.players'),
-                                 joinedload('teams.players.player')).\
-                        filter_by(id=lobby_id).first()
+        with transaction.manager:
+            lobby = DBSession.query(Lobby).\
+                    options(joinedload('owner'),
+                            joinedload('spectators'),
+                            joinedload('teams'),
+                            joinedload('teams.players'),
+                            joinedload('teams.players.player')).\
+                    filter_by(id=lobby_id).first()
+            if lobby is None:
+                # TODO: redirect client to index, give error
+                return
+            self.lobby_id = lobby_id
+            if user_id:
                 player = DBSession.query(Player).filter(
                         Player.steamid==user_id).first()
                 # Request join
                 if not lobby.has_player(player):
                     controllers.join(DBSession, lobby, player)
                     transaction.commit()
-                self.lobby_id = lobby_id
-            lobby = DBSession.merge(lobby)
             self.add_acl_method('on_set_team')
-        # Cause other sockets to leave / Kill the socket listener
-        self.add_acl_method('on_leave')
-        lobby_dict = prep_json_encode(lobby)
-        self.emit('update', make_me_state(user_id, lobby_dict), lobby_dict)
-        self.spawn(self.listener, lobby_id)
+            self.add_acl_method('on_leave')
+            lobby = DBSession.merge(lobby)
+            lobby_dict = prep_json_encode(lobby)
+            self.emit('update', make_me_state(user_id, lobby_dict), lobby_dict)
+            self.spawn(self.listener, lobby_id)
 
     def on_leave(self):
         """
@@ -268,6 +281,8 @@ class LobbyNamespace(BaseNamespace):
                 lobby = DBSession.query(Lobby).\
                         options(joinedload('teams')).\
                         filter_by(id=lobby_id).first()
-                controllers.lock_lobby(DBSession, lobby)
+                r = redis.Redis()
+                r.publish('lobby/%s' % lobby_id, dumps(dict(event='update',
+                    lobby=lobby), cls=PyramidJSONEncoder))
+                controllers.start_lobby(DBSession, lobby)
                 transaction.commit()
-                # TODO: start the lobby

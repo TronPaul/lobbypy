@@ -43,13 +43,15 @@ class AjaxCreateTests(unittest.TestCase):
 
         def _callFUT(self, request):
             from lobbypy.views import create_lobby_ajax
-            return create_lobby_ajax(request)
+            return create_lobby_ajax(request, False)
 
         def test_create(self):
             from lobbypy.models import Lobby, Player
             _registerRoutes(self.config)
             request = testing.DummyRequest()
             request.params['name'] = 'name'
+            request.params['rcon_server'] = ''
+            request.params['rcon_pass'] = ''
             self.config.testing_securitypolicy(userid=
                     1, permissive=True)
             info = self._callFUT(request)
@@ -61,8 +63,10 @@ class AjaxCreateTests(unittest.TestCase):
             _registerRoutes(self.config)
             request = testing.DummyRequest()
             request.params['name'] = 'name'
+            request.params['rcon_server'] = ''
+            request.params['rcon_pass'] = ''
             player = self.session.query(Player).first()
-            lobby = Lobby('OG Lobby', player)
+            lobby = Lobby('OG Lobby', player, '', '', '')
             self.session.add(lobby)
             self.config.testing_securitypolicy(userid=
                     1, permissive=True)
@@ -86,7 +90,7 @@ class AjaxAllLobbiesTests(unittest.TestCase):
         def test_all_lobbies(self):
             from lobbypy.models import Lobby, Player
             player = self.session.query(Player).first()
-            lobby = Lobby('', player)
+            lobby = Lobby('', player, '', '', '')
             self.session.add(lobby)
             request = testing.DummyRequest()
             info = self._callFUT(request)
@@ -109,7 +113,7 @@ class AjaxLobbyStateTests(unittest.TestCase):
         def test_lobby_state(self):
             from lobbypy.models import Lobby, Player
             player = self.session.query(Player).first()
-            lobby = Lobby('', player)
+            lobby = Lobby('', player, '', '', '')
             self.session.add(lobby)
             request = testing.DummyRequest()
             request.matchdict['lobby_id'] =1

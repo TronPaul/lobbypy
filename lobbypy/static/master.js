@@ -8,6 +8,18 @@ $(document).ready(function() {
     lobbies_s = io.connect('/lobbies'),
     lobby_s = io.connect('/lobby');
 
+    var classes = {
+        1: 'scout',
+        2: 'soldier',
+        3: 'pyro',
+        4: 'heavy',
+        5: 'demoman',
+        6: 'engineer',
+        7: 'medic',
+        8: 'sniper',
+        9: 'spy',
+    }
+
     var LobbyModel = Backbone.Model.extend({
     });
 
@@ -81,6 +93,11 @@ $(document).ready(function() {
                 me.model = model;
                 me.render();
             });
+
+            lobby_s.on('start', function(password) {
+                alert('Lobby started w/ password: ' + password);
+                // TODO: redirect to match page
+            });
         },
 
         render: function() {
@@ -104,37 +121,24 @@ $(document).ready(function() {
 
     var LobbiesView = Backbone.View.extend({
         events: {
-            "submit #create_lobby_form": "create_lobby",
+            "click #show-create-lobby": "show_create_lobby_form",
+            "click .lobby-item": "join_lobby",
         },
 
-        create_lobby: function(evt) {
+        join_lobby: function(evt) {
             evt.preventDefault();
-            var me = this;
+            lobby_id = $(evt.currentTarget).attr("id").slice(-1);
+            this.undelegateEvents();
+            window.location.hash = '#/lobby/' + lobby_id;
+        },
 
-            var lobby_name = $('#lobby_name').val();
-            var _hidden_events = {};
-
-            // do ajax create of lobby
-            $.ajax({
-                url: '/_ajax/lobby/create',
-                data: {
-                    name: lobby_name
-                },
-                beforeSend: function() {
-                    _hidden_events = lobbies_s.$events;
-                    lobbies_s.$events = {};
-                },
-                success: function(lobby_id) {
-                    lobbies_s.emit('unsubscribe');
-                    me.undelegateEvents();
-                    window.location.hash = '#lobby/' + lobby_id;
-                },
-                error: function() {
-                    lobbies_s.$events = _hidden_events;
-                }
+        show_create_lobby_form: function(evt) {
+            evt.preventDefault();
+            var form_view = new CreateLobbyFormView({
+                el: $('#pop-up'),
             });
-
-            $("#lobby_name").val("");
+            $('#show-create-lobby').attr('disabled', 'disabled');
+            form_view.render();
         },
 
         initialize: function() {
@@ -157,6 +161,9 @@ $(document).ready(function() {
 
             // recieve lobby update
             lobbies_s.on('update', function(lobby) {
+                lobby.open_classes = _.map(lobby.open_classes, function(cls) {
+                    return classes[cls];
+                });
                 lobby_old = me.collection.filter(function(lobby_old) {
                     lobby_old.id === lobby.id;
                 })[0];
@@ -166,6 +173,11 @@ $(document).ready(function() {
 
             // recieve update all lobbies
             lobbies_s.on('update_all', function(lobbies) {
+                _.each(lobbies, function(lobby) {
+                    lobby.open_classes = _.map(lobby.open_classes, function(cls) {
+                        return classes[cls];
+                    });
+                });
                 me.collection = lobbies;
                 me.render();
             });
@@ -176,9 +188,66 @@ $(document).ready(function() {
 
             var template = Handlebars.compile($("#lobbies_template").html());
 
-            $(this.el).html(template({lobbies: this.collection}));
+            player = $("#create_lobby_form").length != 0;
+
+            $(this.el).html(template({lobbies: this.collection, player: player}));
 
             return this;
+        },
+    });
+
+    var CreateLobbyFormView = Backbone.View.extend({
+        events: {
+            "click #cancel-create": "hide_create_lobby_form",
+            "submit #create-lobby-form": "create_lobby",
+        },
+
+        hide_create_lobby_form: function(evt) {
+            evt.preventDefault();
+            $(this.el).html('');
+            $('#show-create-lobby').removeAttr('disabled');
+            this.undelegateEvents();
+        },
+
+        create_lobby: function(evt) {
+            evt.preventDefault();
+            var me = this;
+
+            var lobby_name = $('#lobby_name').val();
+            var rcon_server = $('#rcon_server').val();
+            var rcon_pass = $('#rcon_pass').val();
+            var map = $('#map').val();
+            var _hidden_events = {};
+
+            // do ajax create of lobby
+            $.ajax({
+                url: '/_ajax/lobby/create',
+                data: {
+                    name: lobby_name,
+                    rcon_server: rcon_server,
+                    rcon_pass: rcon_pass,
+                    game_map: map,
+                },
+                beforeSend: function() {
+                    _hidden_events = lobbies_s.$events;
+                    lobbies_s.$events = {};
+                },
+                success: function(lobby_id) {
+                    lobbies_s.emit('unsubscribe');
+                    me.undelegateEvents();
+                    window.location.hash = '#lobby/' + lobby_id;
+                },
+                error: function() {
+                    lobbies_s.$events = _hidden_events;
+                }
+            });
+
+            $("#lobby_name").val("");
+        },
+
+        render: function() {
+            var template = Handlebars.compile($("#create_lobby_form").html());
+            $(this.el).html(template());
         },
     });
 
@@ -210,6 +279,7 @@ $(document).ready(function() {
             // join lobby
             lobbies_s.emit('unsubscribe');
             lobby_s.emit('join', lobby_id);
+            // TODO: if lobby DNE redirect to index
         },
     });
 

@@ -5,7 +5,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from . import Base
-from ..lib.steam_api import get_player_summary
 
 class Player(Base):
     __tablename__ = 'player'
@@ -47,5 +46,6 @@ class Player(Base):
 
     # TODO: cache this
     def _get_player_summary(self):
+        from ..lib import get_player_summary
         # Do Steam API call to get all data from GetPlayerSummaries for steamid
         return get_player_summary(self.steamid)

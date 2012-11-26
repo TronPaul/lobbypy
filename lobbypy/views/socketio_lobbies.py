@@ -1,11 +1,15 @@
 import redis, logging
-from json import loads
+from json import loads, dumps
 
 from mongoengine import OperationError
 
 from socketio.namespace import BaseNamespace
 
-from lobbypy.models import DBSession, Lobby, prep_json_encode
+from lobbypy.models import (
+        DBSession,
+        Lobby,
+        simple_lobby_prep,
+        )
 
 log = logging.getLogger(__name__)
 
@@ -52,7 +56,7 @@ class LobbiesNamespace(BaseNamespace):
         Client subscribes to Redis
         """
         log.info('Client subscribing to lobbies namespace')
-        lobbies = prep_json_encode(DBSession.query(Lobby).all())
+        lobbies = simple_lobby_prep(DBSession.query(Lobby).all())
         self.emit('update_all', lobbies)
         self.spawn(self.listener)
 

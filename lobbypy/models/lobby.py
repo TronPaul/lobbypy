@@ -10,7 +10,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.event import listens_for
 
-from . import Base, PyramidJSONEncoder
+from . import Base
 
 spectator_table = Table('spectator', Base.metadata,
         Column('lobby_id', Integer, ForeignKey('lobby.id'), primary_key=True),
@@ -28,10 +28,16 @@ class Lobby(Base):
             cascade='save-update,merge,delete')
     spectators = relationship("Player", secondary=spectator_table)
     lock = Column(Boolean, nullable=False, default=False)
+    server = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    gmap = Column(String, nullable=False)
 
-    def __init__(self, name, owner):
+    def __init__(self, name, owner, rcon_info, gmap, password):
         self.name = name
         self.owner = owner
+        self.server = rcon_info
+        self.gmap = gmap
+        self.password = password
         self.join(owner)
         self.teams.append(Team('Red'))
         self.teams.append(Team('Blue'))
@@ -50,6 +56,7 @@ class Lobby(Base):
                 'id': self.id,
                 'name': self.name,
                 'owner': self.owner,
+                'map': self.gmap,
                 'teams': self.teams,
                 'spectators': self.spectators,
                 'lock': self.lock,
@@ -93,6 +100,9 @@ class Lobby(Base):
         """
         team = self.get_team(player)
         return team.is_ready_player(player)
+
+    def get_open_classes(self):
+        return reduce(lambda x, y: x | y, [t.get_open_classes() for t in self.teams], set())
 
     def join(self, player):
         """
@@ -207,6 +217,14 @@ class Team(Base):
         else:
             raise ValueError('Mulptiple %s in %s' % (player, self.players))
 
+    def get_open_classes(self):
+        open_classes = set(range(1,10))
+        for lp in self.players:
+            open_classes.discard(lp.cls)
+            if len(open_classes) == 0:
+                return open_classes
+        return open_classes
+
     def append(self, lobby_player):
         """
         Add the LobbyPlayer to the Team
@@ -302,3 +320,4 @@ class LobbyPlayer(Base):
                 'class': self.cls,
                 'ready': self.ready,
                 }
+
